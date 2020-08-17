@@ -1,0 +1,52 @@
+{
+  "name": "wool-bank-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon --exec ts-node src/index.ts"
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard",
+      "standard-react"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,jsx}": "eslint"
+  },
+  "dependencies": {
+    "@koa/router": "^9.4.0",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-cors": "0.0.0",
+    "@types/koa__router": "^8.0.2",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-cors": "0.0.16",
+    "koa-cors2": "0.0.1",
+    "mysql2": "^2.1.0",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.25"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.11.3",
+    "@types/node": "^14.0.27",
+    "@typescript-eslint/parser": "^3.9.0",
+    "eslint": "^7.7.0",
+    "eslint-config-prettier": "^6.11.0",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  }
+}
