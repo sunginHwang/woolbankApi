@@ -2,12 +2,10 @@
   "env": {
     "node": true,
     "jest": true,
-    "browser": true
   },
   "parser": "babel-eslint",
   "extends": [
-    "standard",
-    "standard-react"
+    "standard"
   ],
   "rules": {
     "space-before-function-paren": [

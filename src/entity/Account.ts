@@ -5,7 +5,7 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    OneToOne,
+    ManyToOne,
     JoinColumn,
     OneToMany
 } from "typeorm";
@@ -34,10 +34,13 @@ export class Account extends BaseEntity {
     @Column()
     amount: number;
 
+    @Column()
+    currentAmount: number;
+
     @Column({name: 'user_id'})
     userId: number;
 
-    @OneToOne(type => User)
+    @ManyToOne(type => User)
     @JoinColumn({ name: 'user_id'})
     user: User;
 
@@ -45,15 +48,18 @@ export class Account extends BaseEntity {
     @JoinColumn({name: 'id'})
     deposits: Deposit[];
 
-    @OneToOne(type => SavingType)
+    @Column({name: 'save_type_id'})
+    saveTypeId: number;
+
+    @ManyToOne(type => SavingType)
     @JoinColumn({ name: 'saving_type_id'})
     savingType: SavingType;
 
-    @Column('timestampz')
+    @Column({ type: "time without time zone", nullable: true })
     @CreateDateColumn({name: 'created_at'})
     createdAt: Date;
 
-    @Column('timestamptz')
+    @Column({ type: "time without time zone", nullable: true })
     @UpdateDateColumn({name: 'updated_at'})
     updatedAt: Date;
 

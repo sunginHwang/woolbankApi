@@ -7,8 +7,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "standard",
-      "standard-react"
+      "standard"
     ]
   },
   "browserslist": {
@@ -47,6 +46,13 @@
     "eslint-config-prettier": "^6.11.0",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "babel-eslint": "^10.1.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "prettier": "^2.0.5"
   }
 }
