@@ -31,9 +31,15 @@ export class Deposit extends BaseEntity {
     @JoinColumn({name: 'user_id'})
     user: User
 
+    @Column({name: 'account_id'})
+    accountId: number;
+
     @ManyToOne(type => Account)
     @JoinColumn({name: 'account_id'})
     account: Account
+
+    @Column({name: 'deposit_date'})
+    depositDate: Date;
 
     @Column('timestampz')
     @CreateDateColumn({name: 'created_at'})

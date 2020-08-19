@@ -26,7 +26,7 @@ export class Account extends BaseEntity {
     taxType: string;
 
     @Column({name: 'regular_transfer_date'})
-    regularTransferDate: string;
+    regularTransferDate: number;
 
     @Column()
     rate: number;
