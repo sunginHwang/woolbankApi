@@ -13,7 +13,9 @@ const router = new Router();
 const userId = 1;
 
 router.get('/', async (ctx) => {
-  const accounts = await getAccountsByUserId(userId);
+  const { limit } = ctx.query;
+
+  const accounts = await getAccountsByUserId(userId, limit);
   return resOK(ctx, accounts ? accounts : []);
 });
 

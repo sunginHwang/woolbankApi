@@ -5,8 +5,13 @@ import { SavingType } from '../entity/SavingType';
 import { resError } from '../utils/common';
 import { Deposit } from '../entity/Deposit';
 
-export const getAccountsByUserId = async (userId: number) => {
-  return await Account.find({ relations: ['savingType'], where: { userId } });
+export const getAccountsByUserId = async (userId: number, limit: number = 100) => {
+  return await Account.find({
+    relations: ['savingType'],
+    where: { userId },
+    order: {id: "DESC"},
+    take: limit
+  });
 };
 
 export const getLastUpdatedAccountDate = async (userId: number) => {
