@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import {
   getAccountByIdAndUserId,
-  getAccountsByUserId,
+  getAccountsByUserId, getLastUpdatedAccountDate,
   isAccountUpdate, removeAccount,
   saveAccount,
 } from '../../service/accountService';
@@ -15,6 +15,11 @@ const userId = 1;
 router.get('/', async (ctx) => {
   const accounts = await getAccountsByUserId(userId);
   return resOK(ctx, accounts ? accounts : []);
+});
+
+router.get('/last-update-date', async (ctx) => {
+  const lastUpdateDate = await getLastUpdatedAccountDate(userId);
+  return resOK(ctx, lastUpdateDate);
 });
 
 router.get('/:accountId', async (ctx) => {

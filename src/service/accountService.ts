@@ -9,6 +9,17 @@ export const getAccountsByUserId = async (userId: number) => {
   return await Account.find({ relations: ['savingType'], where: { userId } });
 };
 
+export const getLastUpdatedAccountDate = async (userId: number) => {
+  const account = await Account.findOne({ relations: ['savingType'], order: {updatedAt: 'DESC'}, where: { userId } });
+
+  // 없으면 캐시할 내용이 없는거니 현재일시 전달
+  if(!account) {
+    return new Date();
+  }
+
+  return account.updatedAt;
+};
+
 export const getAccountByIdAndUserId = async (id: number, userId: number) => {
   return await Account.findOne({ relations: ['savingType'], where: { id, userId } });
 };
