@@ -1,7 +1,7 @@
 import CommonError from "../error/CommonError";
 import {getAccountByIdAndUserId} from "./accountService";
 import {Deposit} from "../entity/Deposit";
-import {Account} from "../entity/Account";
+import {getConnection} from "typeorm";
 
 export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     accountId: number;
@@ -9,6 +9,7 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     amount: number;
     depositDate: Date;
 }) => {
+    let result = true;
     const account = await getAccountByIdAndUserId(accountId, userId);
 
     if (!account) {
@@ -22,10 +23,26 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     deposit.prevTotalAmount = account.currentAmount;
     deposit.userId = userId;
 
-    await Deposit.save(deposit);
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
 
-    account.currentAmount = account.currentAmount + amount;
-    await Account.save(account);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    return true;
+    try {
+        await queryRunner.manager.save(deposit);
+
+        account.currentAmount = account.currentAmount + amount;
+        await queryRunner.manager.save(account);
+
+        await queryRunner.commitTransaction();
+    } catch (e) {
+        result = false;
+        await queryRunner.rollbackTransaction();
+    }finally {
+        await queryRunner.release();
+    }
+
+    return result;
 };
+
