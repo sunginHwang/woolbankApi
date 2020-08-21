@@ -26,11 +26,15 @@ export const getLastUpdatedAccountDate = async (userId: number) => {
 };
 
 export const getAccountByIdAndUserId = async (id: number, userId: number) => {
-  return await Account.findOne({ relations: ['savingType'], where: { id, userId } });
+  return await Account.findOne({ relations: ['savingType', 'deposits'], where: { id, userId } });
+};
+
+export const getAccountById = async (id: number, ) => {
+  return await Account.findOne({ where: { id } });
 };
 
 export const saveAccount = async (saveReq: SaveAccountReqType, userId: number) => {
-  const savingType = await SavingType.findOne({ id: saveReq.saveTypeId });
+  const savingType = await SavingType.findOne({ id: saveReq.savingTypeId });
 
   if (!savingType) {
     throw new CommonError('can`t find savingType', 400);
@@ -42,7 +46,7 @@ export const saveAccount = async (saveReq: SaveAccountReqType, userId: number) =
   account.regularTransferDate = saveReq.regularTransferDate;
   account.rate = saveReq.rate;
   account.amount = saveReq.amount;
-  account.saveTypeId = saveReq.saveTypeId;
+  account.savingTypeId = saveReq.savingTypeId;
   account.userId = userId;
   account.currentAmount = 0;
 

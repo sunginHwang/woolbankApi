@@ -48,8 +48,8 @@ export class Account extends BaseEntity {
     @JoinColumn({name: 'id'})
     deposits: Deposit[];
 
-    @Column({name: 'save_type_id'})
-    saveTypeId: number;
+    @Column({name: 'saving_type_id'})
+    savingTypeId: number;
 
     @ManyToOne(type => SavingType)
     @JoinColumn({ name: 'saving_type_id'})

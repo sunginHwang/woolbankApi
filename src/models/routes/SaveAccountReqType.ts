@@ -4,5 +4,5 @@ export interface SaveAccountReqType {
   regularTransferDate: number;
   rate: number;
   amount: number;
-  saveTypeId: number;
+  savingTypeId: number;
 }

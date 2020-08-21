@@ -80,8 +80,7 @@ router.post('/:accountId/deposit', async (ctx) => {
   if (!depositDate || !amount || !Number.isInteger(Number(amount))) {
     return resError({ctx, errorCode: 400, message: 'body validation fail' });
   }
-
-  const result = await saveDeposit({userId, depositDate, amount, accountId: Number(accountId)});
+  const result = await saveDeposit({userId, depositDate, amount: Number(amount), accountId: Number(accountId)});
   resOK(ctx, result);
 });
 

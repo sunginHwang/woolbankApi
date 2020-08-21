@@ -1,7 +1,8 @@
 import CommonError from "../error/CommonError";
-import {getAccountByIdAndUserId} from "./accountService";
+import {getAccountById} from "./accountService";
 import {Deposit} from "../entity/Deposit";
 import {getConnection} from "typeorm";
+import {Account} from "../entity/Account";
 
 export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     accountId: number;
@@ -10,18 +11,12 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     depositDate: Date;
 }) => {
     let result = true;
-    const account = await getAccountByIdAndUserId(accountId, userId);
+    const account = await getAccountById(accountId);
 
     if (!account) {
         throw new CommonError(`accountId:${accountId} is not found`, 400);
     }
 
-    const deposit = new Deposit();
-    deposit.accountId = accountId;
-    deposit.amount = amount;
-    deposit.depositDate = depositDate;
-    deposit.prevTotalAmount = account.currentAmount;
-    deposit.userId = userId;
 
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
@@ -30,6 +25,13 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     await queryRunner.startTransaction();
 
     try {
+        const deposit = new Deposit();
+        deposit.accountId = account.id;
+        deposit.amount = amount;
+        deposit.depositDate = depositDate;
+        deposit.prevTotalAmount = account.currentAmount;
+        deposit.userId = userId;
+
         await queryRunner.manager.save(deposit);
 
         account.currentAmount = account.currentAmount + amount;
