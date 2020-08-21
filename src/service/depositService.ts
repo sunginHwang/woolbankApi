@@ -2,7 +2,6 @@ import CommonError from "../error/CommonError";
 import {getAccountById} from "./accountService";
 import {Deposit} from "../entity/Deposit";
 import {getConnection} from "typeorm";
-import {Account} from "../entity/Account";
 
 export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     accountId: number;

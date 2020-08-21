@@ -65,7 +65,7 @@ router.get('/:accountId/last-update', async (ctx) => {
   const { lastUpdatedAt } = ctx.query;
   const { accountId } = ctx.params;
 
-  if (!lastUpdatedAt || !accountId || !Number.isInteger(accountId)) {
+  if (!lastUpdatedAt || !accountId || !Number.isInteger(Number(accountId))) {
     return resError({ctx, errorCode: 400, message:  `lastUpdatedAt: ${lastUpdatedAt}, accountId: ${accountId} is not allow request param`});
   }
 
