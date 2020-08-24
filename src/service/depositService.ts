@@ -3,6 +3,11 @@ import {getAccountById} from "./accountService";
 import {Deposit} from "../entity/Deposit";
 import {getConnection} from "typeorm";
 
+
+export const getDepositListByAccountId = async (accountId: number) => {
+    return await Deposit.find({ where: { accountId } });
+}
+
 export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     accountId: number;
     userId: number;
