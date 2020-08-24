@@ -1,10 +1,14 @@
 import { SaveTodoReq } from '../models/routes/SaveTodoReq';
-import { BucketList } from '../entity/BucketList';
 import CommonError from '../error/CommonError';
 import { Todo } from '../entity/Todo';
+import {getBucketListById} from "./bucketListService";
+
+export const getTodoListByBucketListId = async (bucketListId: number, userId: number) => {
+    return await Todo.find({ where: { bucketListId, userId } });
+};
 
 export const saveTodo = async (saveReq: SaveTodoReq, userId: number) => {
-  const bucketList = await BucketList.findOne({ where: { id: saveReq.bucketListId } });
+  const bucketList = await getBucketListById(saveReq.bucketListId, userId);
 
   if (!bucketList) {
     throw new CommonError(`bucketList is not found. bucketListId: ${saveReq.bucketListId}`, 400);
