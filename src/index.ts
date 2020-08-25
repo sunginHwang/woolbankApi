@@ -1,10 +1,10 @@
-import Koa, { Context } from 'koa';
+import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from 'koa-cors';
-import routes from "./routes";
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import errorHandler from "./ middleware/errorHandler";
+import routes from "./routes";
 
 createConnection().then(async connection => {
     const app = new Koa();
