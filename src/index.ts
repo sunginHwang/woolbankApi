@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from 'koa-cors';
+import serve from 'koa-static';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import errorHandler from "./ middleware/errorHandler";
@@ -12,6 +13,7 @@ createConnection().then(async connection => {
     app.use(cors());
     app.use(bodyParser());
     app.use(errorHandler);
+    app.use(serve('./src'));
     app.use(routes.routes()).use(routes.allowedMethods());
 
     app.listen(4000, () => {
