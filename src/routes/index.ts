@@ -8,9 +8,10 @@ import account from './account/index';
 import bucketList from './bucketList/index';
 import todo from './todo/index';
 import auth from './auth/index';
+import user from './user/index';
 
 import { resError, resOK } from '../utils/common';
-import {getRootPath} from "../utils/file";
+import { getRootPath } from '../utils/file';
 
 const routes = new Router();
 
@@ -18,6 +19,7 @@ routes.use('/accounts', account.routes());
 routes.use('/bucket-list', bucketList.routes());
 routes.use('/todo', todo.routes());
 routes.use('/auth', auth.routes());
+routes.use('/user', user.routes());
 
 routes.post(
   '/upload',
