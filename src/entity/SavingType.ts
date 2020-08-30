@@ -9,6 +9,9 @@ export class SavingType extends BaseEntity {
     @Column()
     type: string;
 
+    @Column()
+    name: string;
+
     @Column('timestampz')
     @CreateDateColumn({name: 'created_at'})
     createdAt: Date;

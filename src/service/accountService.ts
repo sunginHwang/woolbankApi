@@ -88,19 +88,3 @@ export const removeAccount = async (id: number, userId: number) => {
   return result;
 };
 
-type isAccountUpdateType = {
-  id: number;
-  userId: number;
-  lastUpdatedAt: Date;
-};
-
-export const isAccountUpdate = async ({ id, userId, lastUpdatedAt }: isAccountUpdateType) => {
-  const account = await getAccountByIdAndUserId(id, userId);
-
-  if (!account) {
-    throw new CommonError(`accountId:${id} is not found`, 400);
-  }
-
-  const accountLastUpdatedAt = account.updatedAt;
-  return accountLastUpdatedAt.getTime() === new Date(lastUpdatedAt).getTime();
-};

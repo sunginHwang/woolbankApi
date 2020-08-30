@@ -37,14 +37,20 @@ export class Account extends BaseEntity {
     @Column()
     currentAmount: number;
 
+    @Column({name: 'start_date'})
+    startDate: Date;
+
+    @Column({name: 'end_date'})
+    endDate: Date;
+
     @Column({name: 'user_id'})
     userId: number;
 
     @ManyToOne(type => User)
-    @JoinColumn({ name: 'user_id'})
+    @JoinColumn({name: 'user_id'})
     user: User;
 
-    @OneToMany(type => Deposit, deposit => deposit.account )
+    @OneToMany(type => Deposit, deposit => deposit.account)
     @JoinColumn({name: 'id'})
     deposits: Deposit[];
 
@@ -52,14 +58,14 @@ export class Account extends BaseEntity {
     savingTypeId: number;
 
     @ManyToOne(type => SavingType)
-    @JoinColumn({ name: 'saving_type_id'})
+    @JoinColumn({name: 'saving_type_id'})
     savingType: SavingType;
 
-    @Column({ type: "time without time zone", nullable: true })
+    @Column({type: "time without time zone", nullable: true})
     @CreateDateColumn({name: 'created_at'})
     createdAt: Date;
 
-    @Column({ type: "time without time zone", nullable: true })
+    @Column({type: "time without time zone", nullable: true})
     @UpdateDateColumn({name: 'updated_at'})
     updatedAt: Date;
 
