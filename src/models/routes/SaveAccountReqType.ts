@@ -5,4 +5,6 @@ export interface SaveAccountReqType {
   rate: number;
   amount: number;
   savingTypeId: number;
+  startDate: Date;
+  endDate: Date;
 }

@@ -30,6 +30,17 @@ export const getAccountByIdAndUserId = async (id: number, userId: number) => {
   return await Account.findOne({ relations: ['savingType', 'deposits'], where: { id, userId } });
 };
 
+export const completeAccountExpiration = async (accountId: number, userId: number) => {
+  const account = await getAccountByIdAndUserId(accountId, userId);
+
+  if (!account) {
+    throw new CommonError(`accountId:${accountId} is not found`, 400);
+  }
+
+  account.isExpiration = true;
+  return await account.save();
+}
+
 export const getAccountById = async (id: number) => {
   return await Account.findOne({ where: { id } });
 };
@@ -46,10 +57,13 @@ export const saveAccount = async (saveReq: SaveAccountReqType, userId: number) =
   account.taxType = saveReq.taxType;
   account.regularTransferDate = saveReq.regularTransferDate;
   account.rate = saveReq.rate;
+  account.startDate = saveReq.startDate;
+  account.endDate = saveReq.endDate;
   account.amount = saveReq.amount;
   account.savingTypeId = saveReq.savingTypeId;
   account.userId = userId;
   account.currentAmount = 0;
+  account.isExpiration = false; // 시작부터 만기일수 없음.
 
   return await account.save();
 };

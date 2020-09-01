@@ -21,6 +21,10 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
         throw new CommonError(`accountId:${accountId} is not found`, 400);
     }
 
+    if(account.isExpiration) {
+        throw new CommonError('만기된 상품은 입금이 불가능 합니다.', 500);
+
+    }
 
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();

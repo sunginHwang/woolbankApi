@@ -1,5 +1,6 @@
 import Router from '@koa/router';
 import {
+  completeAccountExpiration,
   getAccountByIdAndUserId,
   getAccountsByUserId,
   getLastUpdatedAccountDate,
@@ -42,18 +43,32 @@ router.get('/:accountId', async (ctx) => {
   return resOK(ctx, account);
 });
 
+router.put('/:accountId/expiration', async (ctx) => {
+  const { accountId } = ctx.params;
+
+  if (!Number.isInteger(Number(accountId))) {
+    return resError({ ctx, errorCode: 400, message: `${accountId} is not allow request param` });
+  }
+
+  const completedAccount = await completeAccountExpiration(accountId, userId);
+
+  return resOK(ctx, completedAccount.id);
+});
+
 router.post('/', async (ctx) => {
   const reqType: SaveAccountReqType = ctx.request.body;
 
-  const accountValidation =
-    !reqType.title || !reqType.taxType || !reqType.regularTransferDate || !reqType.rate || !reqType.amount;
+  const accountValidation = !reqType.title || !reqType.taxType
+      !reqType.startDate|| !reqType.endDate|| !reqType.regularTransferDate || !reqType.rate || !reqType.amount;
 
   if (accountValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const result = await saveAccount(reqType, userId);
-  resOK(ctx, result);
+  const savedAccountId = await saveAccount(reqType, userId);
+  resOK(ctx, {
+    accountId: savedAccountId.id
+  });
 });
 
 router.delete('/:accountId', async (ctx) => {

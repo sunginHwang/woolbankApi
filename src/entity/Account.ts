@@ -34,8 +34,11 @@ export class Account extends BaseEntity {
     @Column()
     amount: number;
 
-    @Column()
+    @Column({name: 'current_amount'})
     currentAmount: number;
+
+    @Column({name: 'is_expiration'})
+    isExpiration: boolean;
 
     @Column({name: 'start_date'})
     startDate: Date;
