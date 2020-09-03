@@ -4,18 +4,29 @@ import {
   getBucketListByUserId,
   getBucketListById,
   getBucketListLastUpdatedDate,
-  isBucketListUpdate, removeBucketList,
+  removeBucketList,
   saveBucketList,
-  updateBucketList
+  updateBucketList, getLastUpdatedBucketListDate
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
+import { BucketListResType } from '../../models/routes/BucketListResType';
 
 const router = new Router();
 const userId = 1;
 
 router.get('/', async (ctx) => {
   const bucketList = await getBucketListByUserId(userId);
-  return resOK(ctx, bucketList ? bucketList : []);
+  const bucketListRes = bucketList.map<BucketListResType>((bucket) => ({
+    id: bucket.id,
+    title: bucket.title,
+    completeDate: bucket.completeDate,
+    todoCount: bucket.todoList.length,
+    completeTodoCount: bucket.todoList.filter((todo) => todo.isComplete).length,
+    thumbImageUrl: bucket.thumbImageUrl,
+    updatedAt: bucket.updatedAt
+  }));
+
+  return resOK(ctx, bucketListRes ? bucketListRes : []);
 });
 
 router.post('/', async (ctx) => {
@@ -43,8 +54,13 @@ router.get('/:bucketListId', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: `bucketListId: ${bucketListId} is not allow request param` });
   }
 
-  const result = await getBucketListById(Number(bucketListId), userId, true);
-  return resOK(ctx, result);
+  const bucketListDetail = await getBucketListById(Number(bucketListId), userId, true);
+
+  if (!bucketListDetail) {
+    return resError({ ctx, errorCode: 404, message: `bucketList not found, bucketListId: ${bucketListId} ` });
+  }
+
+  return resOK(ctx, bucketListDetail);
 });
 
 router.put('/:bucketListId', async (ctx) => {
@@ -76,19 +92,18 @@ router.delete('/:bucketListId', async (ctx) => {
   resOK(ctx, result);
 });
 
-router.get('/:bucketListId/last-update', async (ctx) => {
-  const { lastUpdatedAt } = ctx.query;
+router.get('/:bucketListId/last-update-date', async (ctx) => {
   const { bucketListId } = ctx.params;
 
-  if (!lastUpdatedAt || !bucketListId || !Number.isInteger(Number(bucketListId))) {
+  if (!bucketListId || !Number.isInteger(Number(bucketListId))) {
     return resError({
       ctx,
       errorCode: 400,
-      message: `lastUpdatedAt: ${lastUpdatedAt}, bucketListId: ${bucketListId} is not allow request param`
+      message: ` bucketListId: ${bucketListId} is not allow request param`
     });
   }
 
-  const result = await isBucketListUpdate({ id: Number(bucketListId), lastUpdatedAt, userId });
+  const result = await getLastUpdatedBucketListDate(Number(bucketListId), userId);
   return resOK(ctx, result);
 });
 

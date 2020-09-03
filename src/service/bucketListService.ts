@@ -32,22 +32,14 @@ export const getBucketListById = async (id: number, userId: number, useTodo: boo
   }
 };
 
-export const isBucketListUpdate = async ({
-  id,
-  userId,
-  lastUpdatedAt
-}: {
-  id: number;
-  userId: number;
-  lastUpdatedAt: Date;
-}) => {
+export const getLastUpdatedBucketListDate = async (id: number, userId: number ) => {
   const bucketList = await getBucketListById(id, userId);
 
   if (!bucketList) {
-    throw new CommonError(`bucketListId:${id} is not found`, 400);
+    throw new CommonError(`bucketListId:${id} is not found`, 404);
   }
 
-  return bucketList.updatedAt.getTime() === new Date(lastUpdatedAt).getTime();
+  return bucketList.updatedAt;
 };
 
 export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: number) => {

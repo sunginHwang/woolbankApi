@@ -37,7 +37,7 @@ router.get('/:accountId', async (ctx) => {
   const account = await getAccountByIdAndUserId(accountId, userId);
 
   if (!account) {
-    throw new CommonError(`accountId:${accountId} is not found`, 400);
+    throw new CommonError(`accountId:${accountId} is not found`, 404);
   }
 
   return resOK(ctx, account);
