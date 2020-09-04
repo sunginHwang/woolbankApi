@@ -14,10 +14,12 @@ router.post('/', async (ctx) => {
     }
 
     const savedTodo = await saveTodo(todoReq,userId);
-    return resOK(ctx, savedTodo);
+    return resOK(ctx, {
+        todoId: savedTodo.id
+    });
 });
 
-router.patch('/:todoId', async (ctx) => {
+router.put('/:todoId', async (ctx) => {
     const { todoId } = ctx.params;
     const { isComplete } = ctx.request.body;
     console.log(todoId);

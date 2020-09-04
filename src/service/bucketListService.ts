@@ -3,6 +3,7 @@ import CommonError from '../error/CommonError';
 import { SaveBucketListReqType } from '../models/routes/SaveBucketListReqType';
 import { getConnection } from 'typeorm';
 import { getTodoListByBucketListId } from './todoService';
+import { Todo } from '../entity/Todo';
 
 export const getBucketListByUserId = async (userId: number, limit: number = 100) => {
   return await BucketList.find({
@@ -32,7 +33,7 @@ export const getBucketListById = async (id: number, userId: number, useTodo: boo
   }
 };
 
-export const getLastUpdatedBucketListDate = async (id: number, userId: number ) => {
+export const getLastUpdatedBucketListDate = async (id: number, userId: number) => {
   const bucketList = await getBucketListById(id, userId);
 
   if (!bucketList) {
@@ -51,7 +52,35 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
   bucketList.imageUrl = saveReq.imageUrl || '';
   bucketList.thumbImageUrl = saveReq.thumbImageUrl || '';
 
-  return await bucketList.save();
+  const connection = getConnection();
+  const queryRunner = connection.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const savedBucketList = await BucketList.save(bucketList);
+
+    const todoList: Todo[] = saveReq.todoList.map((todo) => {
+      delete todo.id;
+      todo.userId = userId;
+      todo.bucketListId = savedBucketList.id;
+      return todo;
+    });
+
+    // todo 존재 시 같이 추가
+    if (todoList.length > 0) {
+      await Todo.save(todoList);
+    }
+    await queryRunner.commitTransaction();
+    return savedBucketList;
+  } catch (e) {
+    await queryRunner.rollbackTransaction();
+  } finally {
+    await queryRunner.release();
+  }
+
+  return null;
 };
 
 export const updateBucketList = async ({

@@ -38,8 +38,15 @@ router.post('/', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const result = await saveBucketList(reqType, userId);
-  resOK(ctx, result);
+  const savedBucketList = await saveBucketList(reqType, userId);
+
+  if (!savedBucketList) {
+    return resError({ ctx, errorCode: 500, message: 'not saved bucketList' });
+  }
+
+  resOK(ctx, {
+    bucketListId: savedBucketList.id
+  });
 });
 
 router.get('/last-update-date', async (ctx) => {

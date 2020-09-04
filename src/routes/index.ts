@@ -55,9 +55,11 @@ routes.post(
       resError({ ctx, errorCode: 500, message: e });
     }
 
+    const subFix = 'http://localhost:4000'
+
     return resOK(ctx, {
-      imageUrl: originPath,
-      thumbImageUrl: thumbImagePath
+      imageUrl: `${subFix}${originPath}`,
+      thumbImageUrl: `${subFix}${thumbImagePath}`,
     });
   }
 );
