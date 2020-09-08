@@ -6,7 +6,8 @@ import {
   getBucketListLastUpdatedDate,
   removeBucketList,
   saveBucketList,
-  updateBucketList, getLastUpdatedBucketListDate
+  updateBucketList,
+  getLastUpdatedBucketListDate
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
 import { BucketListResType } from '../../models/routes/BucketListResType';
@@ -84,8 +85,13 @@ router.put('/:bucketListId', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const result = await updateBucketList({ id: bucketListId, updateReq: reqType, userId });
-  resOK(ctx, result);
+  const updatedBucketList = await updateBucketList({ id: bucketListId, updateReq: reqType, userId });
+
+  if (!updatedBucketList) {
+    return resError({ ctx, errorCode: 500, message: 'not updated bucketList' });
+  }
+
+  resOK(ctx, { bucketListId: updatedBucketList.id });
 });
 
 router.delete('/:bucketListId', async (ctx) => {

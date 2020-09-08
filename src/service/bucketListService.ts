@@ -95,7 +95,7 @@ export const updateBucketList = async ({
   const bucketList = await getBucketListById(id, userId);
 
   if (!bucketList) {
-    throw new CommonError(`bucketListId:${id} is not found`, 400);
+    throw new CommonError(`bucketListId:${id} is not found`, 404);
   }
 
   bucketList.title = updateReq.title;
@@ -113,7 +113,7 @@ export const removeBucketList = async (id: number, userId: number) => {
   const bucketList = await getBucketListById(id, userId);
 
   if (!bucketList) {
-    throw new CommonError(`bucketListId:${id} is not found`, 400);
+    throw new CommonError(`bucketListId:${id} is not found`, 404);
   }
 
   const connection = getConnection();
