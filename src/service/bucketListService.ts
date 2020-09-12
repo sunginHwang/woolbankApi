@@ -4,14 +4,26 @@ import { SaveBucketListReqType } from '../models/routes/SaveBucketListReqType';
 import { getConnection } from 'typeorm';
 import { getTodoListByBucketListId } from './todoService';
 import { Todo } from '../entity/Todo';
+import {BucketListResType} from "../models/routes/BucketListResType";
 
 export const getBucketListByUserId = async (userId: number, limit: number = 100) => {
-  return await BucketList.find({
+
+  const bucketList = await BucketList.find({
     relations: ['todoList'],
     where: { userId },
     order: { id: 'DESC' },
     take: limit
   });
+
+  return bucketList.map<BucketListResType>((bucket) => ({
+    id: bucket.id,
+    title: bucket.title,
+    completeDate: bucket.completeDate,
+    todoCount: bucket.todoList.length,
+    completeTodoCount: bucket.todoList.filter((todo) => todo.isComplete).length,
+    thumbImageUrl: bucket.thumbImageUrl,
+    updatedAt: bucket.updatedAt
+  }));
 };
 
 export const getBucketListLastUpdatedDate = async (userId: number) => {

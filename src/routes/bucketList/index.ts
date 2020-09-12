@@ -10,24 +10,14 @@ import {
   getLastUpdatedBucketListDate
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
-import { BucketListResType } from '../../models/routes/BucketListResType';
 
 const router = new Router();
 const userId = 1;
 
 router.get('/', async (ctx) => {
   const bucketList = await getBucketListByUserId(userId);
-  const bucketListRes = bucketList.map<BucketListResType>((bucket) => ({
-    id: bucket.id,
-    title: bucket.title,
-    completeDate: bucket.completeDate,
-    todoCount: bucket.todoList.length,
-    completeTodoCount: bucket.todoList.filter((todo) => todo.isComplete).length,
-    thumbImageUrl: bucket.thumbImageUrl,
-    updatedAt: bucket.updatedAt
-  }));
 
-  return resOK(ctx, bucketListRes ? bucketListRes : []);
+  return resOK(ctx, bucketList ? bucketList : []);
 });
 
 router.post('/', async (ctx) => {

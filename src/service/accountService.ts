@@ -4,7 +4,7 @@ import CommonError from '../error/CommonError';
 import { SavingType } from '../entity/SavingType';
 import { Deposit } from '../entity/Deposit';
 import { getConnection } from 'typeorm';
-import {getDepositListByAccountId} from "./depositService";
+import { getDepositListByAccountId } from './depositService';
 
 export const getAccountsByUserId = async (userId: number, limit: number = 100) => {
   return await Account.find({
@@ -13,6 +13,21 @@ export const getAccountsByUserId = async (userId: number, limit: number = 100) =
     order: { id: 'DESC' },
     take: limit
   });
+};
+
+export const getNotExpirationAccounts = async (userId: number, limit: number = 3) => {
+  return await Account.find({
+    relations: ['savingType'],
+    where: { userId, isExpiration: false },
+    order: { id: 'DESC' },
+    take: limit
+  });
+};
+
+export const getSavedAmount = async (userId: number) => {
+  const accounts = await getNotExpirationAccounts(userId, 100);
+
+  return accounts.reduce((acc, account) => acc + account.amount, 0);
 };
 
 export const getLastUpdatedAccountDate = async (userId: number) => {
@@ -39,7 +54,7 @@ export const completeAccountExpiration = async (accountId: number, userId: numbe
 
   account.isExpiration = true;
   return await account.save();
-}
+};
 
 export const getAccountById = async (id: number) => {
   return await Account.findOne({ where: { id } });
@@ -101,4 +116,3 @@ export const removeAccount = async (id: number, userId: number) => {
 
   return result;
 };
-
