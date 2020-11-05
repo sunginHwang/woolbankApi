@@ -10,7 +10,7 @@ import todo from './todo/index';
 import auth from './auth/index';
 import user from './user/index';
 import main from './main/index';
-
+import config from '../config/baseConfig';
 import { resError, resOK } from '../utils/common';
 import { getRootPath } from '../utils/file';
 
@@ -57,17 +57,15 @@ routes.post(
       resError({ ctx, errorCode: 500, message: e });
     }
 
-    const subFix = 'http://localhost:4000'
-
     return resOK(ctx, {
-      imageUrl: `${subFix}${originPath}`,
-      thumbImageUrl: `${subFix}${thumbImagePath}`,
+      imageUrl: `${config.uploadUrl}${originPath}`,
+      thumbImageUrl: `${config.uploadUrl}${thumbImagePath}`
     });
   }
 );
 
 routes.get('/', (ctx) => {
-  ctx.body = 'hello world!';
+  ctx.body = config;
 });
 
 export default routes;
