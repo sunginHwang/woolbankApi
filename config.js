@@ -5,7 +5,7 @@ const config = {
   },
   authToken: {
     SECRET_TOKEN_KEY: 'test',
-    ACCESS_TOKEN_EXPIRE: '5s',
+    ACCESS_TOKEN_EXPIRE: '7d',
     ACCESS_REFRESH_EXPIRE: '60d',
     ACCESS_HEADER_TOKEN: 'bearer_auth'
   }

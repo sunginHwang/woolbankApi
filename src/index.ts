@@ -4,7 +4,7 @@ import cors from 'koa-cors';
 import serve from 'koa-static';
 import "reflect-metadata";
 import {createConnection} from "typeorm";
-import errorHandler from "./ middleware/errorHandler";
+import errorHandler from "./middleware/errorHandler";
 import routes from "./routes";
 
 createConnection().then(async connection => {

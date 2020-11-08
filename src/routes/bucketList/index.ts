@@ -10,17 +10,17 @@ import {
   getLastUpdatedBucketListDate
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
+import isAuthenticated from "../../middleware/isAuthenticated";
 
 const router = new Router();
-const userId = 1;
 
-router.get('/', async (ctx) => {
-  const bucketList = await getBucketListByUserId(userId);
+router.get('/', isAuthenticated,async (ctx) => {
+  const bucketList = await getBucketListByUserId(ctx.userId);
 
   return resOK(ctx, bucketList ? bucketList : []);
 });
 
-router.post('/', async (ctx) => {
+router.post('/', isAuthenticated, async (ctx) => {
   const reqType: SaveBucketListReqType = ctx.request.body;
 
   const bucketListValidation = !reqType.title || !reqType.description || !reqType.completeDate;
@@ -29,7 +29,7 @@ router.post('/', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const savedBucketList = await saveBucketList(reqType, userId);
+  const savedBucketList = await saveBucketList(reqType, ctx.userId);
 
   if (!savedBucketList) {
     return resError({ ctx, errorCode: 500, message: 'not saved bucketList' });
@@ -40,19 +40,19 @@ router.post('/', async (ctx) => {
   });
 });
 
-router.get('/last-update-date', async (ctx) => {
-  const lastUpdateDate = await getBucketListLastUpdatedDate(userId);
+router.get('/last-update-date',isAuthenticated, async (ctx) => {
+  const lastUpdateDate = await getBucketListLastUpdatedDate(ctx.userId);
   return resOK(ctx, lastUpdateDate);
 });
 
-router.get('/:bucketListId', async (ctx) => {
+router.get('/:bucketListId', isAuthenticated, async (ctx) => {
   const { bucketListId } = ctx.params;
 
   if (!Number.isInteger(Number(bucketListId))) {
     return resError({ ctx, errorCode: 400, message: `bucketListId: ${bucketListId} is not allow request param` });
   }
 
-  const bucketListDetail = await getBucketListById(Number(bucketListId), userId, true);
+  const bucketListDetail = await getBucketListById(Number(bucketListId), ctx.userId, true);
 
   if (!bucketListDetail) {
     return resError({ ctx, errorCode: 404, message: `bucketList not found, bucketListId: ${bucketListId} ` });
@@ -61,7 +61,7 @@ router.get('/:bucketListId', async (ctx) => {
   return resOK(ctx, bucketListDetail);
 });
 
-router.put('/:bucketListId', async (ctx) => {
+router.put('/:bucketListId', isAuthenticated,async (ctx) => {
   const { bucketListId } = ctx.params;
   const reqType: SaveBucketListReqType = ctx.request.body;
 
@@ -75,7 +75,7 @@ router.put('/:bucketListId', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const updatedBucketList = await updateBucketList({ id: bucketListId, updateReq: reqType, userId });
+  const updatedBucketList = await updateBucketList({ id: bucketListId, updateReq: reqType, userId: ctx.userId });
 
   if (!updatedBucketList) {
     return resError({ ctx, errorCode: 500, message: 'not updated bucketList' });
@@ -84,18 +84,18 @@ router.put('/:bucketListId', async (ctx) => {
   resOK(ctx, { bucketListId: updatedBucketList.id });
 });
 
-router.delete('/:bucketListId', async (ctx) => {
+router.delete('/:bucketListId', isAuthenticated, async (ctx) => {
   const { bucketListId } = ctx.params;
 
   if (!Number.isInteger(Number(bucketListId))) {
     return resError({ ctx, errorCode: 400, message: `bucketListId: ${bucketListId} is not allow request param` });
   }
 
-  const result = await removeBucketList(bucketListId, userId);
+  const result = await removeBucketList(bucketListId, ctx.userId);
   resOK(ctx, result);
 });
 
-router.get('/:bucketListId/last-update-date', async (ctx) => {
+router.get('/:bucketListId/last-update-date', isAuthenticated, async (ctx) => {
   const { bucketListId } = ctx.params;
 
   if (!bucketListId || !Number.isInteger(Number(bucketListId))) {
@@ -106,7 +106,7 @@ router.get('/:bucketListId/last-update-date', async (ctx) => {
     });
   }
 
-  const result = await getLastUpdatedBucketListDate(Number(bucketListId), userId);
+  const result = await getLastUpdatedBucketListDate(Number(bucketListId), ctx.userId);
   return resOK(ctx, result);
 });
 

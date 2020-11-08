@@ -11,30 +11,30 @@ import { SaveAccountReqType } from '../../models/routes/SaveAccountReqType';
 import { resError, resOK } from '../../utils/common';
 import { saveDeposit } from '../../service/depositService';
 import CommonError from '../../error/CommonError';
+import isAuthenticated from "../../middleware/isAuthenticated";
 
 const router = new Router();
-const userId = 1;
 
-router.get('/', async (ctx) => {
+router.get('/', isAuthenticated, async (ctx) => {
   const { limit } = ctx.query;
 
-  const accounts = await getAccountsByUserId(userId, limit);
+  const accounts = await getAccountsByUserId(ctx.userId, limit);
   return resOK(ctx, accounts ? accounts : []);
 });
 
-router.get('/last-update-date', async (ctx) => {
-  const lastUpdateDate = await getLastUpdatedAccountDate(userId);
+router.get('/last-update-date', isAuthenticated, async (ctx) => {
+  const lastUpdateDate = await getLastUpdatedAccountDate(ctx.userId);
   return resOK(ctx, lastUpdateDate);
 });
 
-router.get('/:accountId', async (ctx) => {
+router.get('/:accountId', isAuthenticated, async (ctx) => {
   const { accountId } = ctx.params;
 
   if (!Number.isInteger(Number(accountId))) {
     return resError({ ctx, errorCode: 400, message: `${accountId} is not allow request param` });
   }
 
-  const account = await getAccountByIdAndUserId(accountId, userId);
+  const account = await getAccountByIdAndUserId(accountId, ctx.userId);
 
   if (!account) {
     throw new CommonError(`accountId:${accountId} is not found`, 404);
@@ -43,19 +43,19 @@ router.get('/:accountId', async (ctx) => {
   return resOK(ctx, account);
 });
 
-router.put('/:accountId/expiration', async (ctx) => {
+router.put('/:accountId/expiration', isAuthenticated, async (ctx) => {
   const { accountId } = ctx.params;
 
   if (!Number.isInteger(Number(accountId))) {
     return resError({ ctx, errorCode: 400, message: `${accountId} is not allow request param` });
   }
 
-  const completedAccount = await completeAccountExpiration(accountId, userId);
+  const completedAccount = await completeAccountExpiration(accountId, ctx.userId);
 
   return resOK(ctx, completedAccount.id);
 });
 
-router.post('/', async (ctx) => {
+router.post('/', isAuthenticated, async (ctx) => {
   const reqType: SaveAccountReqType = ctx.request.body;
 
   const accountValidation = !reqType.title || !reqType.taxType
@@ -65,31 +65,31 @@ router.post('/', async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const savedAccountId = await saveAccount(reqType, userId);
+  const savedAccountId = await saveAccount(reqType, ctx.userId);
   resOK(ctx, {
     accountId: savedAccountId.id
   });
 });
 
-router.delete('/:accountId', async (ctx) => {
+router.delete('/:accountId', isAuthenticated, async (ctx) => {
   const { accountId } = ctx.params;
 
   if (!Number.isInteger(Number(accountId))) {
     return resError({ ctx, errorCode: 400, message: `accountId: ${accountId} is not allow request param` });
   }
 
-  const result = await removeAccount(Number(accountId), userId);
+  const result = await removeAccount(Number(accountId), ctx.userId);
   resOK(ctx, result);
 });
 
-router.get('/:accountId/last-update-date', async (ctx) => {
+router.get('/:accountId/last-update-date', isAuthenticated,async (ctx) => {
   const { accountId } = ctx.params;
 
   if (!accountId || !Number.isInteger(Number(accountId))) {
     return resError({ ctx, errorCode: 400, message: ` accountId: ${accountId} is not allow request param` });
   }
 
-  const account = await getAccountByIdAndUserId(accountId, userId);
+  const account = await getAccountByIdAndUserId(accountId, ctx.userId);
 
   if (!account) {
     throw new CommonError(`accountId:${accountId} is not found`, 400);
@@ -98,9 +98,10 @@ router.get('/:accountId/last-update-date', async (ctx) => {
   resOK(ctx, account.updatedAt);
 });
 
-router.post('/:accountId/deposit', async (ctx) => {
-  const { depositDate, amount } = ctx.request.body;
-  const { accountId } = ctx.params;
+router.post('/:accountId/deposit', isAuthenticated, async (ctx) => {
+  const { userId, params, request } = ctx;
+  const { depositDate, amount } = request.body;
+  const { accountId } = params;
 
   if (!amount || !Number.isInteger(Number(amount))) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
