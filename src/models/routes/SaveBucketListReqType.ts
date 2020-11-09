@@ -6,5 +6,5 @@ export interface SaveBucketListReqType {
     completeDate: Date;
     thumbImageUrl?: string;
     imageUrl?: string;
-    todoList: Todo[];
+    todoList: Todo[] | string;
 }

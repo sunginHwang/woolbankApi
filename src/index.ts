@@ -6,6 +6,7 @@ import "reflect-metadata";
 import {createConnection} from "typeorm";
 import errorHandler from "./middleware/errorHandler";
 import routes from "./routes";
+import koaBody from "koa-body";
 
 createConnection().then(async connection => {
     const app = new Koa();
@@ -14,6 +15,7 @@ createConnection().then(async connection => {
     app.use(bodyParser());
     app.use(errorHandler);
     app.use(serve('./src'));
+    app.use(koaBody({ multipart: true }));
     app.use(routes.routes()).use(routes.allowedMethods());
 
     app.listen(4000, () => {

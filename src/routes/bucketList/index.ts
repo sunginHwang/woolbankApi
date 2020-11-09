@@ -1,5 +1,7 @@
 import Router from '@koa/router';
 import { resError, resOK } from '../../utils/common';
+import { imageUpload } from '../../utils/upload';
+
 import {
   getBucketListByUserId,
   getBucketListById,
@@ -22,11 +24,22 @@ router.get('/', isAuthenticated,async (ctx) => {
 
 router.post('/', isAuthenticated, async (ctx) => {
   const reqType: SaveBucketListReqType = ctx.request.body;
+  const file = ctx.request.files ? ctx.request.files.image : null;
+
+  if (typeof reqType.todoList === 'string') {
+    reqType.todoList = JSON.parse(reqType.todoList);
+  }
 
   const bucketListValidation = !reqType.title || !reqType.description || !reqType.completeDate;
 
   if (bucketListValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
+  }
+
+  if (file) {
+    const image = await imageUpload(file);
+    reqType.imageUrl = image?.imageUrl;
+    reqType.thumbImageUrl = image?.thumbImageUrl;
   }
 
   const savedBucketList = await saveBucketList(reqType, ctx.userId);
@@ -64,6 +77,7 @@ router.get('/:bucketListId', isAuthenticated, async (ctx) => {
 router.put('/:bucketListId', isAuthenticated,async (ctx) => {
   const { bucketListId } = ctx.params;
   const reqType: SaveBucketListReqType = ctx.request.body;
+  const file = ctx.request.files ? ctx.request.files.image : null;
 
   if (!Number.isInteger(Number(bucketListId))) {
     return resError({ ctx, errorCode: 400, message: `bucketListId: ${bucketListId} is not allow request param` });
@@ -73,6 +87,13 @@ router.put('/:bucketListId', isAuthenticated,async (ctx) => {
 
   if (bucketListValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
+  }
+
+
+  if (file) {
+    const image = await imageUpload(file);
+    reqType.imageUrl = image?.imageUrl;
+    reqType.thumbImageUrl = image?.thumbImageUrl;
   }
 
   const updatedBucketList = await updateBucketList({ id: bucketListId, updateReq: reqType, userId: ctx.userId });

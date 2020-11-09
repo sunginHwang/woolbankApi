@@ -73,17 +73,21 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
   try {
     const savedBucketList = await BucketList.save(bucketList);
 
-    const todoList: Todo[] = saveReq.todoList.map((todo) => {
-      delete todo.id;
-      todo.userId = userId;
-      todo.bucketListId = savedBucketList.id;
-      return todo;
-    });
+    if (typeof saveReq.todoList !== 'string') {
+      const todoList: Todo[] = saveReq.todoList.map((todo) => {
+        delete todo.id;
+        todo.userId = userId;
+        todo.bucketListId = savedBucketList.id;
+        return todo;
+      });
 
-    // todo 존재 시 같이 추가
-    if (todoList.length > 0) {
-      await Todo.save(todoList);
+      // todo 존재 시 같이 추가
+      if (todoList.length > 0) {
+        await Todo.save(todoList);
+      }
     }
+
+
     await queryRunner.commitTransaction();
     return savedBucketList;
   } catch (e) {
