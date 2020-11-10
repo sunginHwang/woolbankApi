@@ -7,7 +7,8 @@
     "production": "NODE_ENV=production nodemon --exec ts-node src/index.ts",
     "start:local": "ECOSYSTEM=local npm run start",
     "start:prod": "ECOSYSTEM=prod npm run start",
-    "start": "pm2 startOrRestart ecosystem.config.js --update-env"
+    "start": "pm2 startOrRestart ecosystem.config.js --update-env",
+    "start:forever": "NODE_ENV=production forever start -v -c ts-node ./src/index.ts"
   },
   "eslintConfig": {
     "extends": [
