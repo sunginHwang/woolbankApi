@@ -12,7 +12,7 @@ type envType = {
 
 const configList: envType = {
     development: {
-        uploadUrl: 'http://localhost:4000',
+        uploadUrl: 'https://banketlist-api.woolta.com',
     },
     production: {
         uploadUrl: 'https://banketlist-api.woolta.com',
