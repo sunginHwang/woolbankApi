@@ -15,7 +15,6 @@ createConnection().then(async connection => {
     app.use(bodyParser());
     app.use(errorHandler);
     app.use(serve('./src'));
-    app.use(koaBody({ multipart: true }));
     app.use(routes.routes()).use(routes.allowedMethods());
 
     app.listen(4000, () => {

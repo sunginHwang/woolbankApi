@@ -1,4 +1,6 @@
 import Router from '@koa/router';
+import compose from 'koa-compose';
+
 import { resError, resOK } from '../../utils/common';
 import { imageUpload } from '../../utils/upload';
 
@@ -12,17 +14,17 @@ import {
   getLastUpdatedBucketListDate
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
-import isAuthenticated from "../../middleware/isAuthenticated";
+import isAuthenticated from '../../middleware/isAuthenticated';
+import koaBody from 'koa-body';
 
 const router = new Router();
 
-router.get('/', isAuthenticated,async (ctx) => {
+router.get('/', isAuthenticated, async (ctx) => {
   const bucketList = await getBucketListByUserId(ctx.userId);
 
   return resOK(ctx, bucketList ? bucketList : []);
 });
-
-router.post('/', isAuthenticated, async (ctx) => {
+router.post('/', compose([isAuthenticated, koaBody({ multipart: true })]), async (ctx) => {
   const reqType: SaveBucketListReqType = ctx.request.body;
   const file = ctx.request.files ? ctx.request.files.image : null;
 
@@ -53,7 +55,7 @@ router.post('/', isAuthenticated, async (ctx) => {
   });
 });
 
-router.get('/last-update-date',isAuthenticated, async (ctx) => {
+router.get('/last-update-date', isAuthenticated, async (ctx) => {
   const lastUpdateDate = await getBucketListLastUpdatedDate(ctx.userId);
   return resOK(ctx, lastUpdateDate);
 });
@@ -74,7 +76,7 @@ router.get('/:bucketListId', isAuthenticated, async (ctx) => {
   return resOK(ctx, bucketListDetail);
 });
 
-router.put('/:bucketListId', isAuthenticated,async (ctx) => {
+router.put('/:bucketListId', compose([isAuthenticated, koaBody({ multipart: true })]), async (ctx) => {
   const { bucketListId } = ctx.params;
   const reqType: SaveBucketListReqType = ctx.request.body;
   const file = ctx.request.files ? ctx.request.files.image : null;
@@ -88,7 +90,6 @@ router.put('/:bucketListId', isAuthenticated,async (ctx) => {
   if (bucketListValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
-
 
   if (file) {
     const image = await imageUpload(file);
