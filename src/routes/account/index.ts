@@ -65,9 +65,20 @@ router.post('/', isAuthenticated, async (ctx) => {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
 
-  const savedAccountId = await saveAccount(reqType, ctx.userId);
+  const savedAccount = await saveAccount(reqType, ctx.userId);
+
+  // 정기예금일 경우 예금 채워넣기
+  if (reqType.savingTypeId === 3) {
+    await saveDeposit({
+      userId: ctx.userId,
+      depositDate: new Date(),
+      amount: savedAccount.amount,
+      accountId: savedAccount.id
+    });
+  }
+
   resOK(ctx, {
-    accountId: savedAccountId.id
+    accountId: savedAccount.id
   });
 });
 
