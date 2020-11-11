@@ -9,10 +9,11 @@ const router = new Router();
 
 router.get('/', isAuthenticated, async (ctx) => {
     const { userId } = ctx;
-    const [accounts, bucketList, amount] = await Promise.all([getNotExpirationAccounts(userId, 3), getBucketListByUserId(userId, 3), getSavedAmount(userId)]);
+    const [accounts, bucketList, { totalSavedAmount, totalSavedAmountExceptCurrentMonth }] = await Promise.all([getNotExpirationAccounts(userId, 3), getBucketListByUserId(userId, 3), getSavedAmount(userId)]);
 
     const res: MainInfoResType = {
-        amount,
+        totalSavedAmount,
+        totalSavedAmountExceptCurrentMonth,
         accounts,
         bucketList,
     };

@@ -17,7 +17,7 @@ export const getAccountsByUserId = async (userId: number, limit: number = 100) =
 
 export const getNotExpirationAccounts = async (userId: number, limit: number = 3) => {
   return await Account.find({
-    relations: ['savingType'],
+    relations: ['savingType', 'deposits'],
     where: { userId, isExpiration: false },
     order: { id: 'DESC' },
     take: limit
@@ -26,8 +26,17 @@ export const getNotExpirationAccounts = async (userId: number, limit: number = 3
 
 export const getSavedAmount = async (userId: number) => {
   const accounts = await getNotExpirationAccounts(userId, 100);
+  const totalSavedAmount = accounts
+      .map((account) => account.deposits)
+      .reduce((acc, depositList) => {
+        return depositList.reduce((acc, deposit) => acc + deposit.amount, 0);
+      }, 0);
+  const totalSavedAmountExceptCurrentMonth = totalSavedAmount === 0 ? 0 : getLastMonthAmount(accounts);
 
-  return accounts.reduce((acc, account) => acc + account.amount, 0);
+  return {
+    totalSavedAmount,
+    totalSavedAmountExceptCurrentMonth
+  };
 };
 
 export const getLastUpdatedAccountDate = async (userId: number) => {
@@ -115,4 +124,22 @@ export const removeAccount = async (id: number, userId: number) => {
   }
 
   return result;
+};
+
+// 이번달 제외 총 입금액 계산하기
+export const getLastMonthAmount = (accounts: Account[]) => {
+  const now = new Date();
+
+  return accounts
+    .map((account) => account.deposits)
+    .reduce((acc, depositList) => {
+
+      return depositList
+        .filter((deposit) => {
+          // 이번달 제외 필터
+          const isCurrentDeposit = deposit.depositDate.getMonth() === now.getMonth() && deposit.depositDate.getFullYear() === now.getFullYear();
+          return !isCurrentDeposit;
+        })
+        .reduce((acc, deposit) => acc + deposit.amount, 0);
+    }, 0);
 };

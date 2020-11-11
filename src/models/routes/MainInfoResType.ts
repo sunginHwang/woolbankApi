@@ -2,7 +2,8 @@ import {Account} from "../../entity/Account";
 import {BucketListResType} from "./BucketListResType";
 
 export interface MainInfoResType {
-    amount: number;
+    totalSavedAmount: number;
+    totalSavedAmountExceptCurrentMonth: number;
     accounts: Account[],
     bucketList: BucketListResType[],
 }
