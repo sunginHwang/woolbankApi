@@ -26,10 +26,11 @@ export const getNotExpirationAccounts = async (userId: number, limit: number = 3
 
 export const getSavedAmount = async (userId: number) => {
   const accounts = await getNotExpirationAccounts(userId, 100);
+
   const totalSavedAmount = accounts
       .map((account) => account.deposits)
       .reduce((acc, depositList) => {
-        return depositList.reduce((acc, deposit) => acc + deposit.amount, 0);
+        return acc + depositList.reduce((acc, deposit) => acc + deposit.amount, 0);
       }, 0);
   const totalSavedAmountExceptCurrentMonth = totalSavedAmount === 0 ? 0 : getLastMonthAmount(accounts);
 

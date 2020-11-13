@@ -71,7 +71,7 @@ router.post('/', isAuthenticated, async (ctx) => {
   if (reqType.savingTypeId === 3) {
     await saveDeposit({
       userId: ctx.userId,
-      depositDate: new Date(),
+      depositDate: reqType.startDate,
       amount: savedAccount.amount,
       accountId: savedAccount.id
     });
