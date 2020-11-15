@@ -135,7 +135,7 @@ export const getLastMonthAmount = (accounts: Account[]) => {
     .map((account) => account.deposits)
     .reduce((acc, depositList) => {
 
-      return depositList
+      return acc + depositList
         .filter((deposit) => {
           // 이번달 제외 필터
           const isCurrentDeposit = deposit.depositDate.getMonth() === now.getMonth() && deposit.depositDate.getFullYear() === now.getFullYear();
