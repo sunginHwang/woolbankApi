@@ -28,7 +28,7 @@ export class Account extends BaseEntity {
     @Column({name: 'regular_transfer_date'})
     regularTransferDate: number;
 
-    @Column()
+    @Column({ type: 'float'})
     rate: number;
 
     @Column()
