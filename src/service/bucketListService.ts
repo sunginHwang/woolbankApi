@@ -157,3 +157,12 @@ export const removeBucketList = async (id: number, userId: number) => {
 
   return result;
 };
+
+export const updateBucketListByUpdatedAt = async (bucketListId: number, userId: number) => {
+  const bucket = await getBucketListById(bucketListId, userId);
+
+  if (bucket) {
+    bucket.updatedAt = new Date();
+    await bucket.save();
+  }
+}

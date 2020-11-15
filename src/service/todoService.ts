@@ -1,10 +1,11 @@
 import { SaveTodoReq } from '../models/routes/SaveTodoReq';
 import CommonError from '../error/CommonError';
 import { Todo } from '../entity/Todo';
-import {getBucketListById} from "./bucketListService";
+import { getBucketListById, updateBucketListByUpdatedAt } from './bucketListService';
+import { getConnection } from 'typeorm';
 
 export const getTodoListByBucketListId = async (bucketListId: number, userId: number) => {
-    return await Todo.find({ where: { bucketListId, userId } });
+  return await Todo.find({ where: { bucketListId, userId } });
 };
 
 export const saveTodo = async (saveReq: SaveTodoReq, userId: number) => {
@@ -20,27 +21,79 @@ export const saveTodo = async (saveReq: SaveTodoReq, userId: number) => {
   todo.bucketListId = saveReq.bucketListId;
   todo.userId = userId;
 
-  return await todo.save();
+  const connection = getConnection();
+  const queryRunner = connection.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const savedTodo = await todo.save();
+    await updateBucketListByUpdatedAt(saveReq.bucketListId, userId);
+    await queryRunner.commitTransaction();
+    return savedTodo;
+  } catch (e) {
+    await queryRunner.rollbackTransaction();
+    throw e;
+  } finally {
+    await queryRunner.release();
+  }
 };
 
 export const removeTodo = async (todoId: number, userId: number) => {
   const todo = await Todo.findOne({ where: { id: todoId } });
 
   if (!todo) {
-      throw new CommonError(`todo is not found. todoId: ${todoId}`, 400);
+    throw new CommonError(`todo is not found. todoId: ${todoId}`, 400);
   }
 
-  return await Todo.remove(todo);
+  const connection = getConnection();
+  const queryRunner = connection.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const removedTodo = await Todo.remove(todo);
+
+    await updateBucketListByUpdatedAt(todo.bucketListId, userId);
+    await queryRunner.commitTransaction();
+
+    return removedTodo;
+  } catch (e) {
+    await queryRunner.rollbackTransaction();
+    throw e;
+  } finally {
+    await queryRunner.release();
+  }
 };
 
-export const changeTodoComplete = async (todoId: number, isComplete: boolean) => {
-    const todo = await Todo.findOne({ where: { id: todoId } });
+export const changeTodoComplete = async (todoId: number, isComplete: boolean, userId: number) => {
+  const todo = await Todo.findOne({ where: { id: todoId } });
 
-    if (!todo) {
-        throw new CommonError(`todo is not found. todoId: ${todoId}`, 400);
-    }
+  if (!todo) {
+    throw new CommonError(`todo is not found. todoId: ${todoId}`, 400);
+  }
 
-    todo.isComplete = isComplete;
+  todo.isComplete = isComplete;
 
-    return await Todo.save(todo);
+  const connection = getConnection();
+  const queryRunner = connection.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    const updatedTodo = await Todo.save(todo);
+
+    await updateBucketListByUpdatedAt(updatedTodo.bucketListId, userId);
+    await queryRunner.commitTransaction();
+
+    return updatedTodo;
+  } catch (e) {
+    await queryRunner.rollbackTransaction();
+    throw e;
+  } finally {
+    await queryRunner.release();
+  }
 };

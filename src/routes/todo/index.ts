@@ -27,7 +27,7 @@ router.put('/:todoId', isAuthenticated, async (ctx) => {
         return resError({ctx, errorCode: 400, message:  `todoId: ${todoId} is not allow request param`});
     }
 
-    const removeResult = await changeTodoComplete(Number(todoId), isComplete);
+    const removeResult = await changeTodoComplete(Number(todoId), isComplete, ctx.userId);
     return resOK(ctx, removeResult);
 });
 
