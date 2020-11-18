@@ -5,6 +5,7 @@ import { SavingType } from '../entity/SavingType';
 import { Deposit } from '../entity/Deposit';
 import { getConnection } from 'typeorm';
 import { getDepositListByAccountId } from './depositService';
+import { getLastMonth } from '../utils/date';
 
 export const getAccountsByUserId = async (userId: number, limit: number = 100) => {
   return await Account.find({
@@ -129,18 +130,13 @@ export const removeAccount = async (id: number, userId: number) => {
 
 // 이번달 제외 총 입금액 계산하기
 export const getLastMonthAmount = (accounts: Account[]) => {
-  const now = new Date();
+  const lastMonthTime = getLastMonth().getTime();
 
   return accounts
     .map((account) => account.deposits)
     .reduce((acc, depositList) => {
-
-      return acc + depositList
-        .filter((deposit) => {
-          // 이번달 제외 필터
-          const isCurrentDeposit = deposit.depositDate.getMonth() === now.getMonth() && deposit.depositDate.getFullYear() === now.getFullYear();
-          return !isCurrentDeposit;
-        })
+      return acc + depositList           // 이번달 제외
+         .filter((deposit) => lastMonthTime > deposit.depositDate.getTime())
         .reduce((acc, deposit) => acc + deposit.amount, 0);
     }, 0);
 };
