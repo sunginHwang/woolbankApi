@@ -117,8 +117,16 @@ export const updateBucketList = async ({
   bucketList.title = updateReq.title;
   bucketList.description = updateReq.description;
   bucketList.completeDate = updateReq.completeDate;
-  bucketList.imageUrl = updateReq.imageUrl || '';
-  bucketList.thumbImageUrl = updateReq.thumbImageUrl || '';
+
+  // 사진정보는 있는 경우만 update 작업
+  // todo 이전 사진 지우기
+  if (updateReq.imageUrl) {
+    bucketList.imageUrl = updateReq.imageUrl;
+  }
+
+  if (updateReq.thumbImageUrl) {
+    bucketList.thumbImageUrl = updateReq.thumbImageUrl;
+  }
 
   return await bucketList.save();
 };
