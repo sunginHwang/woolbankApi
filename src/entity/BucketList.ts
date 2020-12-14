@@ -33,6 +33,9 @@ export class BucketList extends BaseEntity {
     @Column({name: 'image_url'})
     imageUrl: string;
 
+    @Column({name: 'is_complete'})
+    isComplete: boolean;
+
     @Column({name: 'user_id'})
     userId: number;
 

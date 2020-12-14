@@ -4,10 +4,9 @@ import { SaveBucketListReqType } from '../models/routes/SaveBucketListReqType';
 import { getConnection } from 'typeorm';
 import { getTodoListByBucketListId } from './todoService';
 import { Todo } from '../entity/Todo';
-import {BucketListResType} from "../models/routes/BucketListResType";
+import { BucketListResType } from '../models/routes/BucketListResType';
 
 export const getBucketListByUserId = async (userId: number, limit: number = 100) => {
-
   const bucketList = await BucketList.find({
     relations: ['todoList'],
     where: { userId },
@@ -18,6 +17,7 @@ export const getBucketListByUserId = async (userId: number, limit: number = 100)
   return bucketList.map<BucketListResType>((bucket) => ({
     id: bucket.id,
     title: bucket.title,
+    isComplete: bucket.isComplete,
     completeDate: bucket.completeDate,
     todoCount: bucket.todoList.length,
     completeTodoCount: bucket.todoList.filter((todo) => todo.isComplete).length,
@@ -63,6 +63,7 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
   bucketList.userId = userId;
   bucketList.imageUrl = saveReq.imageUrl || '';
   bucketList.thumbImageUrl = saveReq.thumbImageUrl || '';
+  bucketList.isComplete = false;
 
   const connection = getConnection();
   const queryRunner = connection.createQueryRunner();
@@ -87,7 +88,6 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
       }
     }
 
-
     await queryRunner.commitTransaction();
     return savedBucketList;
   } catch (e) {
@@ -97,6 +97,17 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
   }
 
   return null;
+};
+
+export const completeBucket = async ({ id, userId }: { id: number; userId: number }) => {
+  const bucketList = await getBucketListById(id, userId);
+
+  if (!bucketList) {
+    throw new CommonError(`bucketListId:${id} is not found`, 404);
+  }
+
+  bucketList.isComplete = true;
+  return await bucketList.save();
 };
 
 export const updateBucketList = async ({
@@ -173,4 +184,4 @@ export const updateBucketListByUpdatedAt = async (bucketListId: number, userId: 
     bucket.updatedAt = new Date();
     await bucket.save();
   }
-}
+};

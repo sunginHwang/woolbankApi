@@ -11,7 +11,8 @@ import {
   removeBucketList,
   saveBucketList,
   updateBucketList,
-  getLastUpdatedBucketListDate
+  getLastUpdatedBucketListDate,
+  completeBucket
 } from '../../service/bucketListService';
 import { SaveBucketListReqType } from '../../models/routes/SaveBucketListReqType';
 import isAuthenticated from '../../middleware/isAuthenticated';
@@ -104,6 +105,18 @@ router.put('/:bucketListId', compose([isAuthenticated, koaBody({ multipart: true
   }
 
   resOK(ctx, { bucketListId: updatedBucketList.id });
+});
+
+router.put('/:bucketListId/complete', isAuthenticated, async (ctx) => {
+  const { bucketListId } = ctx.params;
+
+  if (!Number.isInteger(Number(bucketListId))) {
+    return resError({ ctx, errorCode: 400, message: `${bucketListId} is not allow request param` });
+  }
+
+  const completedBucketList = await completeBucket({ id: bucketListId, userId: ctx.userId });
+
+  return resOK(ctx, completedBucketList.id);
 });
 
 router.delete('/:bucketListId', isAuthenticated, async (ctx) => {
