@@ -55,10 +55,9 @@ export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqT
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log('34');
+
     try {
         const savedRegularExpenditure = await regularExpenditure.save();
-        console.log('56');
         await queryRunner.commitTransaction();
         return savedRegularExpenditure;
     } catch (e) {
