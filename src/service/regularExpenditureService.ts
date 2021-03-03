@@ -18,6 +18,10 @@ export const getExpenditureTypeList = async () => {
     return await ExpenditureType.find({ order: { id: 'DESC' } });
 }
 
+export const getExpenditureTypeByType = async (type: string) => {
+    return await ExpenditureType.findOne({ where: { type }});
+}
+
 export const getRegularExpenditureWithType = (expenditureType: ExpenditureType, regularExpenditures: RegularExpenditure[]) => {
     const { id, type, name } = expenditureType;
     const nowDate = getNowDate();
@@ -42,11 +46,18 @@ export const getRegularExpenditureWithType = (expenditureType: ExpenditureType, 
 }
 
 export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqType, userId: number) => {
+
+    const expenditureType = await getExpenditureTypeByType(saveReq.expenditureType);
+
+    if(!expenditureType) {
+        throw new CommonError(`${saveReq.expenditureType} 에 해당하는 지출 타입이 존재하지 않습니다.`, 404);
+    }
+
     const regularExpenditure = new RegularExpenditure();
     regularExpenditure.title = saveReq.title;
     regularExpenditure.amount = saveReq.amount;
     regularExpenditure.regularDate = saveReq.regularDate;
-    regularExpenditure.expenditureTypeId = saveReq.expenditureTypeId;
+    regularExpenditure.expenditureTypeId = expenditureType.id;
     regularExpenditure.isAutoExpenditure = saveReq.isAutoExpenditure;
     regularExpenditure.userId = userId;
 

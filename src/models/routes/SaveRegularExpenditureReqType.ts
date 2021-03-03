@@ -3,5 +3,5 @@ export interface SaveRegularExpenditureReqType {
     amount: number;
     regularDate: number;
     isAutoExpenditure: boolean;
-    expenditureTypeId: number;
+    expenditureType: string;
 };

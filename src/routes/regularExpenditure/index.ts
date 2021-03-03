@@ -27,10 +27,21 @@ router.get('/', isAuthenticated, async (ctx) => {
   return resOK(ctx, response ? response : []);
 });
 
+router.get('/types', isAuthenticated, async (ctx) => {
+  const expenditureTypeList = await getExpenditureTypeList();
+  const response = expenditureTypeList.map((expenditureType) => {
+    return {
+      type: expenditureType.type,
+      value: expenditureType.name
+    };
+  })
+  return resOK(ctx, response);
+});
+
 router.post('/', isAuthenticated, async (ctx) => {
   const reqType: SaveRegularExpenditureReqType = ctx.request.body;
   const isNowAllowValidation =
-    reqType?.title === '' || reqType?.amount < 0 || reqType?.regularDate < 0 || reqType?.expenditureTypeId < 0;
+    reqType?.title === '' || reqType?.amount < 0 || reqType?.regularDate < 0 || reqType?.expenditureType === '';
 
   if (isNowAllowValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
