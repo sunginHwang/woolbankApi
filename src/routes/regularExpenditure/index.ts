@@ -2,7 +2,6 @@ import Router from '@koa/router';
 
 import isAuthenticated from '../../middleware/isAuthenticated';
 import {
-  getExpenditureTypeList,
   getRegularExpenditureListByUserId,
   removeRegularExpenditure,
   saveRegularExpenditure,
@@ -10,6 +9,7 @@ import {
 } from '../../service/regularExpenditureService';
 import { resError, resOK } from '../../utils/common';
 import { SaveRegularExpenditureReqType } from '../../models/routes/SaveRegularExpenditureReqType';
+import {getExpenditureAccountBookCategories} from "../../service/accountBookCategoryService";
 
 const router = new Router();
 
@@ -17,7 +17,7 @@ router.get('/', isAuthenticated, async (ctx) => {
   const { limit } = ctx.query;
   const [regularExpenditures, expenditureTypeList] = await Promise.all([
     getRegularExpenditureListByUserId(ctx.userId, limit),
-    getExpenditureTypeList()
+    getExpenditureAccountBookCategories(ctx.userId)
   ]);
 
   const response = expenditureTypeList
@@ -27,21 +27,11 @@ router.get('/', isAuthenticated, async (ctx) => {
   return resOK(ctx, response ? response : []);
 });
 
-router.get('/types', isAuthenticated, async (ctx) => {
-  const expenditureTypeList = await getExpenditureTypeList();
-  const response = expenditureTypeList.map((expenditureType) => {
-    return {
-      type: expenditureType.type,
-      value: expenditureType.name
-    };
-  })
-  return resOK(ctx, response);
-});
 
 router.post('/', isAuthenticated, async (ctx) => {
   const reqType: SaveRegularExpenditureReqType = ctx.request.body;
   const isNowAllowValidation =
-    reqType?.title === '' || reqType?.amount < 0 || reqType?.regularDate < 0 || reqType?.expenditureType === '';
+    reqType?.title === '' || reqType?.amount < 0 || reqType?.regularDate < 0 || reqType?.accountBookCategoryId < 0;
 
   if (isNowAllowValidation) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });

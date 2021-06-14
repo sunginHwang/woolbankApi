@@ -10,7 +10,15 @@ export const getAccountBookCategoriesByUserId = async (userId: number, limit: nu
   });
 };
 
-export const getAccountBookByIdAndUserId = async (id: number, userId: number) => {
+export const getExpenditureAccountBookCategories = async (userId: number) => {
+  return await AccountBookCategory.find({
+    where: { userId, delYn: false, type: 'expenditure' },
+    order: { id: 'DESC' },
+  });
+};
+
+
+export const getAccountBookCategoryByIdAndUserId = async (id: number, userId: number) => {
     return await AccountBookCategory.findOne({ where: { id, userId } });
 };
 
@@ -29,7 +37,7 @@ export const saveAccountBookCategory = async (saveReq: AccountBookCategoryReqTyp
 };
 
 export const removeAccountBookCategory = async (id: number, userId: number) => {
-  const accountBookCategory = await getAccountBookByIdAndUserId(id, userId);
+  const accountBookCategory = await getAccountBookCategoryByIdAndUserId(id, userId);
 
   if (!accountBookCategory) {
     throw new CommonError(`accountBookCategory is not found. id: ${id}`, 400);

@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import {User} from "./User";
 import {ExpenditureType} from "./ExpenditureType";
+import {AccountBookCategory} from "./AccountBookCategory";
 
 @Entity('regular_expenditure')
 export class RegularExpenditure extends BaseEntity {
@@ -36,12 +37,12 @@ export class RegularExpenditure extends BaseEntity {
     @JoinColumn({ name: 'user_id'})
     user: User;
 
-    @Column({name: 'expenditure_type_id'})
-    expenditureTypeId: number;
+    @Column({ name: 'account_book_category_id' })
+    accountBookCategoryId: number;
 
-    @ManyToOne(type => ExpenditureType)
-    @JoinColumn({name: 'expenditure_type_id'})
-    expenditureType: ExpenditureType;
+    @ManyToOne((type) => AccountBookCategory)
+    @JoinColumn({ name: 'account_book_category_id' })
+    accountBookCategory: AccountBookCategory;
 
 
     @Column({ type: "time without time zone", nullable: true })

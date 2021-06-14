@@ -1,40 +1,16 @@
 import Router from '@koa/router';
-import { getAccountBooksByUserId, saveAccountBook } from '../../service/accountBookService';
+import { getAccountBooksByUserIdAndDateTime, saveAccountBook } from '../../service/accountBookService';
 import { resError, resOK } from '../../utils/common';
 import isAuthenticated from '../../middleware/isAuthenticated';
 import { SaveAccountBookReqType } from '../../models/routes/SaveAccountBookReqType';
-import { AccountBookCategoryType } from '../../models/AccountBookCategoryType';
 
 const router = new Router();
 
-interface IListRes {
-  id: number;
-  title: string;
-  categoryName: string;
-  type: AccountBookCategoryType;
-  isRegularExpenditure: boolean;
-  amount: number;
-  registerDateTime: Date;
-}
-
 router.get('/', isAuthenticated, async (ctx) => {
-  const { limit } = ctx.query;
+  const { limit, dateTime } = ctx.query;
+  const accountBooks = await getAccountBooksByUserIdAndDateTime({ userId: ctx.userId, dateTime: new Date(dateTime), limit});
 
-  const accountBooks = await getAccountBooksByUserId(ctx.userId, limit);
-
-  const response: IListRes[] = accountBooks.map((accountBook) => {
-    const { id, title, type, isRegularExpenditure, amount, registerDateTime, accountBookCategory } = accountBook;
-    return {
-      id,
-      title,
-      type,
-      isRegularExpenditure,
-      amount,
-      registerDateTime,
-      categoryName: accountBookCategory.name
-    };
-  });
-  return resOK(ctx, response || []);
+  return resOK(ctx, accountBooks || []);
 });
 
 router.post('/', isAuthenticated, async (ctx) => {

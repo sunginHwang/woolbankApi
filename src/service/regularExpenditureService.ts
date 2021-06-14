@@ -4,6 +4,7 @@ import {SaveRegularExpenditureReqType} from "../models/routes/SaveRegularExpendi
 import CommonError from "../error/CommonError";
 import {ExpenditureType} from "../entity/ExpenditureType";
 import {getNowDate, getRemainDate} from "../utils/date";
+import {getAccountBookCategoryByIdAndUserId} from "./accountBookCategoryService";
 
 
 export const getRegularExpenditureListByUserId = async (userId: number, limit: number = 100) => {
@@ -14,20 +15,12 @@ export const getRegularExpenditureListByUserId = async (userId: number, limit: n
     });
 }
 
-export const getExpenditureTypeList = async () => {
-    return await ExpenditureType.find({ order: { id: 'DESC' } });
-}
-
-export const getExpenditureTypeByType = async (type: string) => {
-    return await ExpenditureType.findOne({ where: { type }});
-}
-
 export const getRegularExpenditureWithType = (expenditureType: ExpenditureType, regularExpenditures: RegularExpenditure[]) => {
     const { id, type, name } = expenditureType;
     const nowDate = getNowDate();
 
     const regularExpenditureList = regularExpenditures
-        .filter((re) => re.expenditureTypeId === id)
+        .filter((re) => re.accountBookCategoryId === id)
         .map((r) => Object.assign(r, { regularExpenditureDay: getRemainDate(r.regularDate) }));
 
     // 정기지출 당일 리스트
@@ -47,17 +40,17 @@ export const getRegularExpenditureWithType = (expenditureType: ExpenditureType, 
 
 export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqType, userId: number) => {
 
-    const expenditureType = await getExpenditureTypeByType(saveReq.expenditureType);
+    const accountBookCategory = await getAccountBookCategoryByIdAndUserId(saveReq.accountBookCategoryId, userId);
 
-    if(!expenditureType) {
-        throw new CommonError(`${saveReq.expenditureType} 에 해당하는 지출 타입이 존재하지 않습니다.`, 404);
+    if(!accountBookCategory) {
+        throw new CommonError('사용가능한 지출 타입이 아닙니다.', 404);
     }
 
     const regularExpenditure = new RegularExpenditure();
     regularExpenditure.title = saveReq.title;
     regularExpenditure.amount = saveReq.amount;
     regularExpenditure.regularDate = saveReq.regularDate;
-    regularExpenditure.expenditureTypeId = expenditureType.id;
+    regularExpenditure.accountBookCategoryId = accountBookCategory.id;
     regularExpenditure.isAutoExpenditure = saveReq.isAutoExpenditure;
     regularExpenditure.userId = userId;
 
@@ -69,6 +62,7 @@ export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqT
 
     try {
         const savedRegularExpenditure = await regularExpenditure.save();
+        savedRegularExpenditure.accountBookCategory = accountBookCategory;
         await queryRunner.commitTransaction();
         return savedRegularExpenditure;
     } catch (e) {
@@ -90,3 +84,4 @@ export const removeRegularExpenditure = async (regularExpenditureId: number) => 
 
     return await RegularExpenditure.remove(regularExpenditure);
 };
+
