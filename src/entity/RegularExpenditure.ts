@@ -9,7 +9,6 @@ import {
     JoinColumn,
 } from "typeorm";
 import {User} from "./User";
-import {ExpenditureType} from "./ExpenditureType";
 import {AccountBookCategory} from "./AccountBookCategory";
 
 @Entity('regular_expenditure')
