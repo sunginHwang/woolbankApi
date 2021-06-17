@@ -1,10 +1,13 @@
+import { getConnection, In } from 'typeorm';
+import { lastDayOfMonth, getDate } from 'date-fns';
+import * as _ from 'lodash';
+
 import { RegularExpenditure } from '../entity/RegularExpenditure';
-import { getConnection } from 'typeorm';
 import { SaveRegularExpenditureReqType } from '../models/routes/SaveRegularExpenditureReqType';
 import CommonError from '../error/CommonError';
 import { getNowDate, getRemainDate } from '../utils/date';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
-import {AccountBookCategory} from "../entity/AccountBookCategory";
+import { AccountBookCategory } from '../entity/AccountBookCategory';
 
 export const getRegularExpenditureListByUserId = async (userId: number, limit: number = 100) => {
   return await RegularExpenditure.find({
@@ -14,17 +17,21 @@ export const getRegularExpenditureListByUserId = async (userId: number, limit: n
   });
 };
 
-export const getRegularExpenditureListByRegularDate = async (registerDate: number) => {
+export const getRegularExpenditureListByRegularDate = async (dateList: number[]) => {
   return await RegularExpenditure.find({
-    where: { registerDate },
+    where: { regularDate: In(dateList) },
     order: { id: 'DESC' }
   });
 };
 
 export const createAccountbooks = async () => {
   const now = new Date();
-  const regularExpenditureList = await getRegularExpenditureListByRegularDate(now.getDate());
-}
+  const lastDateOfMonth = getDate(lastDayOfMonth(now));
+  const nowDate = getDate(now);
+  const findDays = _.range(nowDate, lastDateOfMonth + 1);
+  const regularExpenditureList = await getRegularExpenditureListByRegularDate(findDays);
+  return regularExpenditureList;
+};
 
 export const getRegularExpenditureWithType = (
   category: AccountBookCategory,
