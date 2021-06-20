@@ -6,19 +6,12 @@ import {
   removeRegularExpenditure,
   saveRegularExpenditure,
   getRegularExpenditureWithType,
-  createAccountbooks
 } from '../../service/regularExpenditureService';
 import { resError, resOK } from '../../utils/common';
 import { SaveRegularExpenditureReqType } from '../../models/routes/SaveRegularExpenditureReqType';
 import {getExpenditureAccountBookCategories} from "../../service/accountBookCategoryService";
 
 const router = new Router();
-
-router.get('/test', async (ctx) => {
-  const accountBooks = await createAccountbooks();
-
-  return resOK(ctx, accountBooks || []);
-});
 
 router.get('/', isAuthenticated, async (ctx) => {
   const { limit } = ctx.query;

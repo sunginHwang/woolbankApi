@@ -1,5 +1,5 @@
 import { getConnection, In } from 'typeorm';
-import { lastDayOfMonth, getDate } from 'date-fns';
+import { getDate, setDate, isLastDayOfMonth } from 'date-fns';
 import * as _ from 'lodash';
 
 import { RegularExpenditure } from '../entity/RegularExpenditure';
@@ -8,6 +8,7 @@ import CommonError from '../error/CommonError';
 import { getNowDate, getRemainDate } from '../utils/date';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
 import { AccountBookCategory } from '../entity/AccountBookCategory';
+import { AccountBook } from '../entity/AccountBook';
 
 export const getRegularExpenditureListByUserId = async (userId: number, limit: number = 100) => {
   return await RegularExpenditure.find({
@@ -24,35 +25,64 @@ export const getRegularExpenditureListByRegularDate = async (dateList: number[])
   });
 };
 
-export const createAccountbooks = async () => {
+// 하루 단위 정기예금 벌크 처리
+export const scheduleRegularExpenditure = async () => {
   const now = new Date();
-  const lastDateOfMonth = getDate(lastDayOfMonth(now));
   const nowDate = getDate(now);
-  const findDays = _.range(nowDate, lastDateOfMonth + 1);
-  const regularExpenditureList = await getRegularExpenditureListByRegularDate(findDays);
-  return regularExpenditureList;
+  const isNot31 = nowDate !== 31;
+  const findDays = isLastDayOfMonth(now) && isNot31 ? _.range(nowDate, 32) : [nowDate];
+
+  try {
+    const regularExpenditureList = await getRegularExpenditureListByRegularDate(findDays);
+
+    if (regularExpenditureList.length === 0) {
+      return;
+    }
+
+    const insertValues = regularExpenditureList.map((regularExpenditure) => {
+      const { title, amount, userId, accountBookCategoryId, regularDate } = regularExpenditure;
+      const registerDateTime = setDate(now, regularDate);
+      return {
+        title,
+        amount,
+        memo: '',
+        type: 'expenditure',
+        isRegularExpenditure: true,
+        createdAt: now,
+        updatedAt: now,
+        registerDateTime,
+        userId,
+        accountBookCategoryId
+      };
+    });
+
+    // @ts-ignore
+    await getConnection().createQueryBuilder().insert().into(AccountBook).values(insertValues).execute();
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export const getRegularExpenditureWithType = (
-  category: AccountBookCategory,
-  regularExpenditures: RegularExpenditure[]
+    category: AccountBookCategory,
+    regularExpenditures: RegularExpenditure[]
 ) => {
   const { id, type, name } = category;
   const nowDate = getNowDate();
 
   const regularExpenditureList = regularExpenditures
-    .filter((re) => re.accountBookCategoryId === id)
-    .map((r) => Object.assign(r, { regularExpenditureDay: getRemainDate(r.regularDate) }));
+      .filter((re) => re.accountBookCategoryId === id)
+      .map((r) => Object.assign(r, { regularExpenditureDay: getRemainDate(r.regularDate) }));
 
   // 정기지출 당일 리스트
   const regularDateList = regularExpenditureList.filter((item) => item.regularDate === nowDate);
   // 지출일까지 날짜 남은 리스트 -> 날짜 순 정렬
   const notRegularDateList = regularExpenditureList
-    .filter((item) => item.regularDate !== nowDate)
-    .sort((a, b) => {
-      // 지출일 아닌건 날짜 정렬
-      return a.regularExpenditureDay.getTime() - b.regularExpenditureDay.getTime();
-    });
+      .filter((item) => item.regularDate !== nowDate)
+      .sort((a, b) => {
+        // 지출일 아닌건 날짜 정렬
+        return a.regularExpenditureDay.getTime() - b.regularExpenditureDay.getTime();
+      });
 
   // 리스트 순서는 당일, 해당 달에 남은날, 다음달 이체일 순서
   const list = [...regularDateList, ...notRegularDateList];
