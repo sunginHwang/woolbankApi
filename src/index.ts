@@ -11,7 +11,7 @@ import { scheduleRegularExpenditure } from './service/regularExpenditureService'
 
 
 // 매일 자정 정기 예금 실행
-cron.schedule('0 0 0 * *', async function () {
+cron.schedule('0 0 0 * * *', async function () {
     await scheduleRegularExpenditure();
 });
 
