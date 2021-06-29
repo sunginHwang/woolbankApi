@@ -1,5 +1,6 @@
-import { endOfMonth, startOfMonth, parseISO }from 'date-fns';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { Between } from 'typeorm';
+import * as _ from 'lodash';
 import { AccountBook } from '../entity/AccountBook';
 import { SaveAccountBookReqType } from '../models/routes/SaveAccountBookReqType';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
@@ -7,26 +8,22 @@ import CommonError from '../error/CommonError';
 
 export const getAccountBooksByUserIdAndDateTime = async ({
   userId,
-  limit = 100,
+  limit = 10000,
   dateTime
 }: {
   userId: number;
   dateTime: Date;
   limit?: number;
 }) => {
-  const accountBookList = await AccountBook.find({
+  return await AccountBook.find({
     relations: ['accountBookCategory'],
     where: { userId, registerDateTime: Between(startOfMonth(dateTime), endOfMonth(dateTime)) },
     order: { id: 'DESC' },
     take: limit
   });
-
-  return accountBookList.map(convertClientAccountBook);
 };
 
-export const
-
-    saveAccountBook = async (reqType: SaveAccountBookReqType, userId: number) => {
+export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: number) => {
   const { categoryId, amount, registerDateTime, memo = '', title, type } = reqType;
   const accountBookCategory = await getAccountBookCategoryByIdAndUserId(categoryId, userId);
 
@@ -51,7 +48,7 @@ export const
 
 export const convertClientAccountBook = (accountBook: AccountBook) => {
   const { id, title, type, isRegularExpenditure, amount, registerDateTime, accountBookCategory } = accountBook;
-  return  {
+  return {
     id,
     title,
     type,
@@ -59,6 +56,17 @@ export const convertClientAccountBook = (accountBook: AccountBook) => {
     amount,
     registerDateTime,
     categoryName: accountBookCategory.name
-  }
-}
+  };
+};
 
+export const getAccountBookMonthlyStatistics = async ({ userId, dateTime }: { userId: number; dateTime: Date }) => {
+  const accountBooks = await getAccountBooksByUserIdAndDateTime({ userId, dateTime });
+  const groupData = _.groupBy(accountBooks, 'accountBookCategoryId');
+  return Object.entries(groupData).map(([key, item]) => {
+    return {
+      key,
+      categoryName: item[0].accountBookCategory.name,
+      amount: item.reduce((prev, acc) => prev + acc.amount, 0)
+    };
+  });
+};
