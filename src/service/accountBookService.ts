@@ -1,10 +1,11 @@
-import { endOfMonth, startOfMonth } from 'date-fns';
+import { endOfMonth, startOfMonth, startOfDay, endOfDay } from 'date-fns';
 import { Between } from 'typeorm';
 import * as _ from 'lodash';
 import { AccountBook } from '../entity/AccountBook';
 import { SaveAccountBookReqType } from '../models/routes/SaveAccountBookReqType';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
 import CommonError from '../error/CommonError';
+import {AccountBookCategoryType} from "../models/AccountBookCategoryType";
 
 export const getAccountBooksByUserIdAndDateTime = async ({
   userId,
@@ -59,14 +60,34 @@ export const convertClientAccountBook = (accountBook: AccountBook) => {
   };
 };
 
-export const getAccountBookMonthlyStatistics = async ({ userId, dateTime }: { userId: number; dateTime: Date }) => {
-  const accountBooks = await getAccountBooksByUserIdAndDateTime({ userId, dateTime });
-  const groupData = _.groupBy(accountBooks, 'accountBookCategoryId');
-  return Object.entries(groupData).map(([key, item]) => {
-    return {
-      key,
-      categoryName: item[0].accountBookCategory.name,
-      amount: item.reduce((prev, acc) => prev + acc.amount, 0)
-    };
+export const getAccountBookMonthlyStatistics = async ({
+  userId,
+  type = 'expenditure',
+  startDate,
+  endDate
+}: {
+  userId: number;
+  type?: AccountBookCategoryType;
+  startDate: Date;
+  endDate: Date;
+}) => {
+  const accountBooks = await AccountBook.find({
+    relations: ['accountBookCategory'],
+    where: {
+      userId,
+      type,
+      registerDateTime: Between(startOfDay(startDate), endOfDay(endDate))
+    }
   });
+
+  return _.chain(accountBooks)
+    .groupBy('accountBookCategoryId')
+    .map((item, key) => {
+      return {
+        categoryId: key,
+        categoryName: item[0].accountBookCategory.name,
+        amount: item.reduce((prev, acc) => prev + acc.amount, 0)
+      };
+    })
+    .sort((a, b) => b.amount - a.amount);
 };
