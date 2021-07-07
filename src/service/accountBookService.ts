@@ -80,13 +80,18 @@ export const getAccountBookMonthlyStatistics = async ({
     }
   });
 
+  const totalAmount = accountBooks.reduce((acc, accountBook) => acc + accountBook.amount, 0);
+
   return _.chain(accountBooks)
     .groupBy('accountBookCategoryId')
     .map((item, key) => {
+      const amount = item.reduce((prev, acc) => prev + acc.amount, 0);
+      const percentage = Number(((amount / totalAmount) * 100).toFixed(0));
       return {
+        amount,
+        percentage,
         categoryId: key,
         categoryName: item[0].accountBookCategory.name,
-        amount: item.reduce((prev, acc) => prev + acc.amount, 0)
       };
     })
     .sort((a, b) => b.amount - a.amount);
