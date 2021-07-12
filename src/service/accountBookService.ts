@@ -5,7 +5,7 @@ import { AccountBook } from '../entity/AccountBook';
 import { SaveAccountBookReqType } from '../models/routes/SaveAccountBookReqType';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
 import CommonError from '../error/CommonError';
-import {AccountBookCategoryType} from "../models/AccountBookCategoryType";
+import { AccountBookCategoryType } from '../models/AccountBookCategoryType';
 
 export const getAccountBooksByUserIdAndDateTime = async ({
   userId,
@@ -22,6 +22,19 @@ export const getAccountBooksByUserIdAndDateTime = async ({
     order: { id: 'DESC' },
     take: limit
   });
+};
+
+export const getAccountBook = async ({ userId, id }: { userId: number; id: number }) => {
+  const accountBook = await AccountBook.findOne({
+    relations: ['accountBookCategory'],
+    where: { userId, id }
+  });
+
+  if (!accountBook) {
+    throw new CommonError(`accountBookId:${id} is not found`, 404);
+  }
+
+  return convertClientAccountBook(accountBook, true);
 };
 
 export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: number) => {
@@ -44,20 +57,26 @@ export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: n
 
   const newAccountBook = await accountBook.save();
   newAccountBook.accountBookCategory = accountBookCategory;
-  return convertClientAccountBook(newAccountBook);
+  return convertClientAccountBook(newAccountBook, false);
 };
 
-export const convertClientAccountBook = (accountBook: AccountBook) => {
-  const { id, title, type, isRegularExpenditure, amount, registerDateTime, accountBookCategory } = accountBook;
-  return {
+export const convertClientAccountBook = (accountBook: AccountBook, useMemo?: boolean) => {
+  const { id, title, type, memo, isRegularExpenditure, amount, registerDateTime, accountBookCategory } = accountBook;
+  const commonResult = {
     id,
     title,
     type,
     isRegularExpenditure,
     amount,
     registerDateTime,
-    categoryName: accountBookCategory.name
+    category: accountBookCategory
   };
+
+  if (useMemo) {
+    return Object.assign({}, commonResult, { memo });
+  }
+
+  return commonResult;
 };
 
 export const getAccountBookMonthlyStatistics = async ({
@@ -91,7 +110,7 @@ export const getAccountBookMonthlyStatistics = async ({
         amount,
         percentage,
         categoryId: key,
-        categoryName: item[0].accountBookCategory.name,
+        categoryName: item[0].accountBookCategory.name
       };
     })
     .sort((a, b) => b.amount - a.amount);

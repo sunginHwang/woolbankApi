@@ -3,6 +3,7 @@ import {
   getAccountBooksByUserIdAndDateTime,
   convertClientAccountBook,
   saveAccountBook,
+  getAccountBook,
   getAccountBookMonthlyStatistics
 } from '../../service/accountBookService';
 import { resError, resOK } from '../../utils/common';
@@ -19,22 +20,7 @@ router.get('/', isAuthenticated, async (ctx) => {
     limit
   });
 
-  return resOK(ctx, accountBooks.map(convertClientAccountBook) || []);
-});
-
-router.post('/', isAuthenticated, async (ctx) => {
-  const reqType: SaveAccountBookReqType = ctx.request.body;
-
-  const isValidRequest =
-    !reqType.amount || !reqType.title || !reqType.registerDateTime || !reqType.categoryId || !reqType.type;
-
-  if (isValidRequest) {
-    return resError({ ctx, errorCode: 400, message: 'body validation fail' });
-  }
-
-  const accountBook = await saveAccountBook(reqType, ctx.userId);
-
-  resOK(ctx, accountBook);
+  return resOK(ctx, accountBooks.map((item) => convertClientAccountBook(item, false)) || []);
 });
 
 router.get('/statistics', isAuthenticated, async (ctx) => {
@@ -55,4 +41,35 @@ router.get('/statistics', isAuthenticated, async (ctx) => {
 
   return resOK(ctx, accountBookStatistic);
 });
+
+router.get('/:accountBookId', isAuthenticated, async (ctx) => {
+  const { accountBookId } = ctx.params;
+
+  if (!Number.isInteger(Number(accountBookId))) {
+    return resError({ ctx, errorCode: 400, message: `${accountBookId} is not allow request param` });
+  }
+
+  const accountBook = await getAccountBook({
+    userId: ctx.userId,
+    id: Number(accountBookId)
+  });
+
+  return resOK(ctx, accountBook);
+});
+
+router.post('/', isAuthenticated, async (ctx) => {
+  const reqType: SaveAccountBookReqType = ctx.request.body;
+
+  const isValidRequest =
+    !reqType.amount || !reqType.title || !reqType.registerDateTime || !reqType.categoryId || !reqType.type;
+
+  if (isValidRequest) {
+    return resError({ ctx, errorCode: 400, message: 'body validation fail' });
+  }
+
+  const accountBook = await saveAccountBook(reqType, ctx.userId);
+
+  resOK(ctx, accountBook);
+});
+
 export default router;
