@@ -34,7 +34,7 @@ export const getAccountBook = async ({ userId, id }: { userId: number; id: numbe
     throw new CommonError(`accountBookId:${id} is not found`, 404);
   }
 
-  return convertClientAccountBook(accountBook, true);
+  return accountBook;
 };
 
 export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: number) => {
@@ -50,7 +50,6 @@ export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: n
   accountBook.amount = amount;
   accountBook.memo = memo;
   accountBook.registerDateTime = registerDateTime;
-  accountBook.userId = userId;
   accountBook.accountBookCategoryId = categoryId;
   accountBook.isRegularExpenditure = false;
   accountBook.type = type;
@@ -58,6 +57,34 @@ export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: n
   const newAccountBook = await accountBook.save();
   newAccountBook.accountBookCategory = accountBookCategory;
   return convertClientAccountBook(newAccountBook, false);
+};
+
+export const updateAccountBook = async (reqType: SaveAccountBookReqType, id: number, userId: number) => {
+  const { categoryId, amount, registerDateTime, memo = '', title, type } = reqType;
+  const accountBookCategory = await getAccountBookCategoryByIdAndUserId(categoryId, userId);
+
+  if (!accountBookCategory) {
+    throw new CommonError(`categoryId:${reqType.categoryId} is not found`, 404);
+  }
+
+  const accountBook = await getAccountBook({ userId, id });
+
+  accountBook.title = title;
+  accountBook.amount = amount;
+  accountBook.memo = memo;
+  accountBook.registerDateTime = registerDateTime;
+  accountBook.accountBookCategoryId = categoryId;
+  accountBook.type = type;
+
+  const newAccountBook = await accountBook.save();
+  newAccountBook.accountBookCategory = accountBookCategory;
+  return convertClientAccountBook(newAccountBook, false);
+};
+
+export const removeAccountBook = async (id: number, userId: number) => {
+  const accountBook = await getAccountBook({ userId, id });
+  const removedAccountBook = await accountBook.remove();
+  return removedAccountBook.id;
 };
 
 export const convertClientAccountBook = (accountBook: AccountBook, useMemo?: boolean) => {
