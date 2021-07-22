@@ -49,6 +49,7 @@ export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: n
   accountBook.title = title;
   accountBook.amount = amount;
   accountBook.memo = memo;
+  accountBook.userId = userId;
   accountBook.registerDateTime = registerDateTime;
   accountBook.accountBookCategoryId = categoryId;
   accountBook.isRegularExpenditure = false;
