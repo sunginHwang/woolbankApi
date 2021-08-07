@@ -117,16 +117,15 @@ router.post('/:accountId/deposit', isAuthenticated, async (ctx) => {
   if (!amount || !Number.isInteger(Number(amount))) {
     return resError({ ctx, errorCode: 400, message: 'body validation fail' });
   }
-  const isSaved = await saveDeposit({
+  const savedDeposit = await saveDeposit({
     userId,
     depositDate: depositDate ? depositDate : new Date(),
     amount: Number(amount),
     accountId: Number(accountId)
   });
 
-  if (isSaved) {
-    const account = await getAccountByIdAndUserId(accountId, userId);
-    resOK(ctx, account);
+  if (savedDeposit) {
+    resOK(ctx, savedDeposit);
   } else {
     resError({ ctx, errorCode: 500, message: '입금에 실패하였습니다.' });
   }

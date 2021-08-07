@@ -14,7 +14,6 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
     amount: number;
     depositDate: Date;
 }) => {
-    let result = true;
     const account = await getAccountById(accountId);
 
     if (!account) {
@@ -40,19 +39,20 @@ export const saveDeposit = async ({ accountId, userId, amount, depositDate }: {
         deposit.prevTotalAmount = account.currentAmount;
         deposit.userId = userId;
 
-        await queryRunner.manager.save(deposit);
+        const savedDeposit = await queryRunner.manager.save(deposit);
 
         account.currentAmount = account.currentAmount + amount;
         await queryRunner.manager.save(account);
 
         await queryRunner.commitTransaction();
+        return savedDeposit;
     } catch (e) {
-        result = false;
+
         await queryRunner.rollbackTransaction();
     }finally {
         await queryRunner.release();
     }
 
-    return result;
+    return null;
 };
 
