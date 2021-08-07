@@ -53,7 +53,15 @@ export const getLastUpdatedAccountDate = async (userId: number) => {
 };
 
 export const getAccountByIdAndUserId = async (id: number, userId: number) => {
-  return await Account.findOne({ relations: ['savingType', 'deposits'], where: { id, userId } });
+  const account = await Account.findOne({ relations: ['savingType', 'deposits'], where: { id, userId } });
+
+  if (!account?.deposits) return account;
+
+  account.deposits = account.deposits.sort((a, b) => {
+    return Number(new Date(b.depositDate)) - Number(new Date(a.depositDate));
+  });
+
+  return account;
 };
 
 export const completeAccountExpiration = async (accountId: number, userId: number) => {
