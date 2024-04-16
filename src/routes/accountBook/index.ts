@@ -9,6 +9,7 @@ import {
 import { resError, resOK } from '../../utils/common';
 import isAuthenticated from '../../middleware/isAuthenticated';
 import { SaveAccountBookReqType } from '../../models/routes/SaveAccountBookReqType';
+import isRealUserAuthenticated from '../../middleware/isRealUserAuthenticated';
 
 const router = new Router();
 
@@ -16,15 +17,15 @@ router.get('/', isAuthenticated, async (ctx) => {
   const { limit, dateTime } = ctx.query;
   const accountBooks = await getAccountBooksByUserIdAndDateTime({
     userId: ctx.userId,
-    dateTime: new Date(dateTime),
-    limit
+    dateTime: new Date(dateTime as any),
+    limit: Number(limit),
   });
 
   return resOK(ctx, accountBooks.map((item) => convertClientAccountBook(item, false)) || []);
 });
 
 router.get('/statistics', isAuthenticated, async (ctx) => {
-  const { startDate, endDate, type } = ctx.query;
+  const { startDate, endDate, type } = ctx.query as any;
 
   const isValidRequest = !startDate || !endDate || !type || (type !== 'income' && type !== 'expenditure');
 
@@ -35,8 +36,8 @@ router.get('/statistics', isAuthenticated, async (ctx) => {
   const accountBookStatistic = await getAccountBookMonthlyStatistics({
     userId: ctx.userId,
     type,
-    startDate: new Date(startDate),
-    endDate: new Date(endDate)
+    startDate: new Date(startDate as string),
+    endDate: new Date(endDate as string)
   });
 
   return resOK(ctx, accountBookStatistic);
@@ -57,8 +58,8 @@ router.get('/:accountBookId', isAuthenticated, async (ctx) => {
   return resOK(ctx, convertClientAccountBook(accountBook, true));
 });
 
-router.post('/', isAuthenticated, async (ctx) => {
-  const reqType: SaveAccountBookReqType = ctx.request.body;
+router.post('/', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
+  const reqType: SaveAccountBookReqType = ctx.request.body as SaveAccountBookReqType;
 
   const isValidRequest =
     !reqType.amount || !reqType.title || !reqType.registerDateTime || !reqType.categoryId || !reqType.type;
@@ -72,8 +73,8 @@ router.post('/', isAuthenticated, async (ctx) => {
   resOK(ctx, accountBook);
 });
 
-router.put('/:accountBookId', isAuthenticated, async (ctx) => {
-  const reqType: SaveAccountBookReqType = ctx.request.body;
+router.put('/:accountBookId', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
+  const reqType: SaveAccountBookReqType = ctx.request.body as SaveAccountBookReqType;
   const { accountBookId } = ctx.params;
   const isValidRequest =
     !reqType.amount || !reqType.title || !reqType.registerDateTime || !reqType.categoryId || !reqType.type;
@@ -87,14 +88,14 @@ router.put('/:accountBookId', isAuthenticated, async (ctx) => {
   resOK(ctx, updatedAccountBook);
 });
 
-router.delete('/:accountBookId', isAuthenticated, async (ctx) => {
+router.delete('/:accountBookId', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
   const { accountBookId } = ctx.params;
 
   if (!Number.isInteger(Number(accountBookId))) {
     return resError({ ctx, errorCode: 400, message: `accountBookId: ${accountBookId} is not allow request param` });
   }
 
-  const removedAccountBookId = await removeAccountBook(accountBookId, ctx.userId);
+  const removedAccountBookId = await removeAccountBook(Number(accountBookId), ctx.userId);
 
   resOK(ctx, removedAccountBookId);
 });

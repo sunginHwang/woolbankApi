@@ -4,6 +4,7 @@ import { User } from '../entity/User';
 import { SocialType } from '../models/SocialType';
 import { SocialLoginReq } from '../models/routes/SocialLoginReq';
 import { createAuthToken } from './authService';
+import { AuthType } from '../models/ITokenInfo';
 
 export const getUserById = async (id: number) => {
   return User.findOne({ where: { id } });
@@ -13,6 +14,7 @@ export const getSocialUser = async (socialId: string, loginType: SocialType) => 
   const socialUser = await User.findOne({ where: { socialId, loginType } });
 
   if (socialUser) {
+     //@ts-ignore
     delete socialUser.password;
   }
 
@@ -44,6 +46,7 @@ export const saveSocialUser = async (req: SocialLoginReq) => {
         await queryRunner.commitTransaction();
 
         // 암호 노출 방지
+        //@ts-ignore
         delete savedUser.password;
         return savedUser;
     } catch (e) {
@@ -54,10 +57,11 @@ export const saveSocialUser = async (req: SocialLoginReq) => {
     }
 };
 
-export const getUserWithToken = (user: User) => {
-    const tokenInfo = createAuthToken(user.id);
+export const getUserWithToken = (user: User, loginType: AuthType = 'user') => {
+    const tokenInfo = createAuthToken(user.id, loginType);
     return {user, ...tokenInfo};
 }
+
 
 const getPassword = (id:string, salt:string) => {
     return crypto.scryptSync(id, salt, 64, { N: 1024 }).toString('hex');

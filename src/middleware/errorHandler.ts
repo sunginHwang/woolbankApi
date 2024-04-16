@@ -6,10 +6,10 @@ const errorHandler = async (ctx: ExtendableContext, next: Next) => {
         await next()
     } catch (e) {
         const errorRes: IRes<{ error: string; message: string }> = {
-            status: e?.status || 500,
+            status: (e as { status?: number }).status || 500,
             data: {
                 error: JSON.stringify(e),
-                message: e?.message || '오류가 발생하였습니다.'
+                message: (e as { message?: string }).message || '오류가 발생하였습니다.'
             }
         }
         ctx.status = errorRes.status

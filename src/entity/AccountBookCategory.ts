@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { User } from "./User";
 import { AccountBookCategoryType } from "../models/AccountBookCategoryType";
+import { AccountBookCategoryImage } from './AccountBookCategoryImage';
 
 @Entity('account_book_category')
 export class AccountBookCategory extends BaseEntity {
@@ -28,6 +29,16 @@ export class AccountBookCategory extends BaseEntity {
 
     @Column({name: 'type'})
     type: AccountBookCategoryType;
+
+    @Column({ name: 'account_book_category_image_id' })
+    accountBookCategoryImageId: number;
+
+    @Column({ name: 'use_statistic' })
+    useStatistic: boolean;
+  
+    @ManyToOne((type) => AccountBookCategoryImage)
+    @JoinColumn({ name: 'account_book_category_image_id' })
+    accountBookCategoryImage: AccountBookCategoryImage;
 
     @ManyToOne(type => User)
     @JoinColumn({name: 'user_id'})

@@ -12,6 +12,7 @@ import { AccountBook } from '../entity/AccountBook';
 
 export const getRegularExpenditureListByUserId = async (userId: number, limit: number = 100) => {
   return await RegularExpenditure.find({
+    relations: ['accountBookCategory','accountBookCategory.accountBookCategoryImage'],
     where: { userId },
     order: { id: 'DESC' },
     take: limit
@@ -20,6 +21,7 @@ export const getRegularExpenditureListByUserId = async (userId: number, limit: n
 
 export const getRegularExpenditureListByRegularDate = async (dateList: number[]) => {
   return await RegularExpenditure.find({
+    relations: ['accountBookCategory','accountBookCategory.accountBookCategoryImage'],
     where: { regularDate: In(dateList) },
     order: { id: 'DESC' }
   });
@@ -67,7 +69,7 @@ export const getRegularExpenditureWithType = (
     category: AccountBookCategory,
     regularExpenditures: RegularExpenditure[]
 ) => {
-  const { id, type, name } = category;
+  const { id, type, name,  accountBookCategoryImage } = category;
   const nowDate = getNowDate();
 
   const regularExpenditureList = regularExpenditures
@@ -86,7 +88,7 @@ export const getRegularExpenditureWithType = (
 
   // 리스트 순서는 당일, 해당 달에 남은날, 다음달 이체일 순서
   const list = [...regularDateList, ...notRegularDateList];
-  return Object.assign({ type, name }, { list });
+  return Object.assign({ type, name, imageUrl: accountBookCategoryImage.imageUrl }, { list });
 };
 
 export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqType, userId: number) => {
@@ -96,6 +98,7 @@ export const saveRegularExpenditure = async (saveReq: SaveRegularExpenditureReqT
     throw new CommonError('사용가능한 지출 타입이 아닙니다.', 404);
   }
 
+  
   const regularExpenditure = new RegularExpenditure();
   regularExpenditure.title = saveReq.title;
   regularExpenditure.amount = saveReq.amount;

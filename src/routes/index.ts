@@ -12,6 +12,7 @@ import accountBookCategory from './accountBookCategory/index';
 import regularExpenditure from './regularExpenditure/index';
 
 import config from '../config/baseConfig';
+import accountBookCategoryImage from './accountBookCategoryImage/index';
 
 const routes = new Router();
 
@@ -19,7 +20,7 @@ routes.use('/main', main.routes());
 routes.use('/accounts', account.routes());
 routes.use('/account-books', accountBook.routes());
 routes.use('/account-book-categories', accountBookCategory.routes());
-
+routes.use('/account-book-category-images', accountBookCategoryImage.routes());
 routes.use('/bucket-list', bucketList.routes());
 routes.use('/regular-expenditures', regularExpenditure.routes());
 routes.use('/todo', todo.routes());

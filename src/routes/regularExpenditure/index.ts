@@ -10,13 +10,14 @@ import {
 import { resError, resOK } from '../../utils/common';
 import { SaveRegularExpenditureReqType } from '../../models/routes/SaveRegularExpenditureReqType';
 import {getExpenditureAccountBookCategories} from "../../service/accountBookCategoryService";
+import isRealUserAuthenticated from '../../middleware/isRealUserAuthenticated';
 
 const router = new Router();
 
 router.get('/', isAuthenticated, async (ctx) => {
   const { limit } = ctx.query;
   const [regularExpenditures, expenditureTypeList] = await Promise.all([
-    getRegularExpenditureListByUserId(ctx.userId, limit),
+    getRegularExpenditureListByUserId(ctx.userId, Number(limit)),
     getExpenditureAccountBookCategories(ctx.userId)
   ]);
 
@@ -28,8 +29,8 @@ router.get('/', isAuthenticated, async (ctx) => {
 });
 
 
-router.post('/', isAuthenticated, async (ctx) => {
-  const reqType: SaveRegularExpenditureReqType = ctx.request.body;
+router.post('/', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
+  const reqType: SaveRegularExpenditureReqType = ctx.request.body as SaveRegularExpenditureReqType;
   const isNowAllowValidation =
     reqType?.title === '' || reqType?.amount < 0 || reqType?.regularDate < 0 || reqType?.accountBookCategoryId < 0;
 
@@ -48,7 +49,7 @@ router.post('/', isAuthenticated, async (ctx) => {
   });
 });
 
-router.delete('/:regularExpenditureId', isAuthenticated, async (ctx) => {
+router.delete('/:regularExpenditureId', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
   const { regularExpenditureId } = ctx.params;
 
   if (!Number.isInteger(Number(regularExpenditureId))) {
@@ -59,7 +60,7 @@ router.delete('/:regularExpenditureId', isAuthenticated, async (ctx) => {
     });
   }
 
-  const result = await removeRegularExpenditure(regularExpenditureId);
+  const result = await removeRegularExpenditure(Number(regularExpenditureId));
   resOK(ctx, result);
 });
 

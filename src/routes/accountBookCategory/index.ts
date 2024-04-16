@@ -7,18 +7,19 @@ import {
 import { resError, resOK } from '../../utils/common';
 import isAuthenticated from '../../middleware/isAuthenticated';
 import { AccountBookCategoryReqType } from '../../models/routes/AccountBookCategoryReqType';
+import isRealUserAuthenticated from '../../middleware/isRealUserAuthenticated';
 
 const router = new Router();
 
 router.get('/', isAuthenticated, async (ctx) => {
   const { limit } = ctx.query;
 
-  const accountBookCategories = await getAccountBookCategoriesByUserId(ctx.userId, limit);
+  const accountBookCategories = await getAccountBookCategoriesByUserId(ctx.userId, Number(limit));
   return resOK(ctx, accountBookCategories ? accountBookCategories : []);
 });
 
-router.post('/', isAuthenticated, async (ctx) => {
-  const reqType: AccountBookCategoryReqType = ctx.request.body;
+router.post('/', isAuthenticated,  async (ctx) => {
+  const reqType: AccountBookCategoryReqType = ctx.request.body as AccountBookCategoryReqType;
 
   const isValidRequest = !reqType.name || !reqType.type;
 
@@ -31,7 +32,7 @@ router.post('/', isAuthenticated, async (ctx) => {
   resOK(ctx, accountBookCategory);
 });
 
-router.delete('/:accountBookCategoryId', isAuthenticated, async (ctx) => {
+router.delete('/:accountBookCategoryId', isAuthenticated, isRealUserAuthenticated, async (ctx) => {
   const { accountBookCategoryId } = ctx.params;
 
   if (!Number.isInteger(Number(accountBookCategoryId))) {
@@ -48,3 +49,5 @@ router.delete('/:accountBookCategoryId', isAuthenticated, async (ctx) => {
 });
 
 export default router;
+
+

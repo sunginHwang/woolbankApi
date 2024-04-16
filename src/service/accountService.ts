@@ -80,7 +80,7 @@ export const getAccountById = async (id: number) => {
 };
 
 export const saveAccount = async (saveReq: SaveAccountReqType, userId: number) => {
-  const savingType = await SavingType.findOne({ id: saveReq.savingTypeId });
+  const savingType = await SavingType.findOne({ where: { id: saveReq.savingTypeId } });
 
   if (!savingType) {
     throw new CommonError('can`t find savingType', 400);

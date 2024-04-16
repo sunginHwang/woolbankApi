@@ -1,5 +1,8 @@
-import {ExtendableContext} from "koa";
+//@ts-ignore
 
-export interface CustomExtendableContext extends ExtendableContext{
+import {ExtendableContext} from "koa";
+import { ITokenInfo } from "./ITokenInfo";
+
+export interface CustomExtendableContext extends ExtendableContext, Pick<ITokenInfo, 'authType'>{
     userId: number;
 }

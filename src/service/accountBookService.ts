@@ -17,7 +17,7 @@ export const getAccountBooksByUserIdAndDateTime = async ({
     limit?: number;
 }) => {
     return await AccountBook.find({
-        relations: ['accountBookCategory'],
+        relations: ['accountBookCategory', 'accountBookCategory.accountBookCategoryImage'],
         where: {userId, registerDateTime: Between(startOfMonth(dateTime), endOfMonth(dateTime))},
         order: {id: 'DESC'},
         take: limit
@@ -26,7 +26,7 @@ export const getAccountBooksByUserIdAndDateTime = async ({
 
 export const getAccountBook = async ({userId, id}: { userId: number; id: number }) => {
     const accountBook = await AccountBook.findOne({
-        relations: ['accountBookCategory'],
+        relations: ['accountBookCategory', 'accountBookCategory.accountBookCategoryImage'],
         where: {userId, id}
     });
 
@@ -134,11 +134,13 @@ export const getAccountBookMonthlyStatistics = async ({
         .map((item, key) => {
             const amount = item.reduce((prev, acc) => prev + acc.amount, 0);
             const percentage = Number(((amount / totalAmount) * 100).toFixed(0));
+            const accountBookCategory = item[0].accountBookCategory;
             return {
                 amount,
                 percentage,
                 categoryId: key,
-                categoryName: item[0].accountBookCategory.name,
+                useStatistic: accountBookCategory.useStatistic,
+                categoryName: accountBookCategory.name,
                 list: item.map(({title, amount, registerDateTime}) => {
                     return {title, amount, registerDateTime};
                 }).sort((a, b) => b.amount - a.amount)

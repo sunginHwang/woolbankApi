@@ -2,6 +2,7 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from 'koa-cors';
 import serve from 'koa-static';
+import cookie from 'koa-cookie';
 import 'reflect-metadata';
 import cron from 'node-cron';
 import { createConnection } from 'typeorm';
@@ -15,10 +16,16 @@ cron.schedule('0 0 0 * * *', async function () {
     await scheduleRegularExpenditure();
 });
 
-createConnection().then(async (connection) => {
+
+createConnection().then(async () => {
     const app = new Koa();
 
-    app.use(cors());
+    app.use(cors({
+        origin: 'http://localhost:4200', // Next.js 애플리케이션의 주소
+        credentials: true, // 쿠키 공유를 위해 필요
+      }));
+      //app.use(cors());
+     app.use(cookie());  
     app.use(bodyParser());
     app.use(errorHandler);
     app.use(serve('./src'));

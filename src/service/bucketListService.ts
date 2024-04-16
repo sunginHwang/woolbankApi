@@ -76,6 +76,7 @@ export const saveBucketList = async (saveReq: SaveBucketListReqType, userId: num
 
     if (typeof saveReq.todoList !== 'string') {
       const todoList: Todo[] = saveReq.todoList.map((todo) => {
+        //@ts-ignore
         delete todo.id;
         todo.userId = userId;
         todo.bucketListId = savedBucketList.id;

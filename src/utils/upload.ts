@@ -13,7 +13,7 @@ export const imageUpload = async (file: File) => {
 
   const rootPath = getRootPath();
   const uniqueId = crypto.randomBytes(16).toString('hex');
-  const fileName = `${uniqueId}_${file.name}`;
+  const fileName = `${uniqueId}_${file.originalFilename}`;
 
   const originPath = `/uploads/${fileName}`;
   const thumbImagePath = `/uploads/thumb/${fileName}`;
@@ -21,11 +21,11 @@ export const imageUpload = async (file: File) => {
   const thumbnailUploadPath = `${rootPath}${thumbImagePath}`;
 
   try {
-    const reader = fs.createReadStream(file.path);
+    const reader = fs.createReadStream(file.filepath);
     const stream = fs.createWriteStream(originUploadPath);
     await reader.pipe(stream);
 
-    await sharp(file.path).resize(80, 80, { fit: 'fill' }).toFile(thumbnailUploadPath);
+    await sharp(file.filepath).resize(80, 80, { fit: 'fill' }).toFile(thumbnailUploadPath);
 
     return {
       imageUrl: `${config.uploadUrl}${originPath}`,
