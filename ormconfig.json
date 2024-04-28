@@ -1,11 +1,11 @@
 {
    "type": "mysql",
-   "host": "test",
+   "host": "woolta.com",
    "port": 3306,
-   "username": "test",
-   "password": "test",
-   "database": "test",
-   "synchronize": true,
+   "username": "root",
+   "password": "as455748",
+   "database": "woolBank",
+   "synchronize": false,
    "logging": false,
    "entities": [
       "src/entity/**/*.ts"
