@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
-    "production": "NODE_ENV=production nodemon --exec ts-node src/index.ts",
+    "production": "NODE_ENV=production ts-node src/index.ts",
     "start:local": "ECOSYSTEM=local npm run start",
     "start:prod": "ECOSYSTEM=prod npm run start",
     "start": "pm2 startOrRestart ecosystem.config.js --update-env",
