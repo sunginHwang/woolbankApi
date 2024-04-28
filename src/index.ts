@@ -20,10 +20,7 @@ cron.schedule('0 0 0 * * *', async function () {
 createConnection().then(async () => {
     const app = new Koa();
 
-    app.use(cors({
-        origin: 'http://localhost:4200', // Next.js 애플리케이션의 주소
-        credentials: true, // 쿠키 공유를 위해 필요
-      }));
+    app.use(cors());
       //app.use(cors());
      app.use(cookie());  
     app.use(bodyParser());
