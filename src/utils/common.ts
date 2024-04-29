@@ -22,3 +22,9 @@ export const resError = ({ctx, errorCode, message}: {ctx: ExtendableContext, err
     ctx.status = errorRes.status;
     ctx.body = errorRes;
 }
+
+
+export const setAuthCookie = (ctx: ExtendableContext, accessToken: string, refreshToken: string) => {
+    ctx.cookies.set('accessToken', accessToken,  {httpOnly: true, secure: true, sameSite: 'none'});
+    ctx.cookies.set('refreshToken', refreshToken,  {httpOnly: true, secure: true, sameSite: 'none'});
+}

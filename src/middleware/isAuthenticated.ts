@@ -1,7 +1,7 @@
 import { Next } from 'koa';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { ITokenInfo } from '../models/ITokenInfo';
-import { resError } from '../utils/common';
+import { resError, setAuthCookie } from '../utils/common';
 import { CustomExtendableContext } from '../models/CustomExtendableContext';
 import config from '../../config';
 import { createAuthToken, getRefreshTokenInfo } from '../service/authService';
@@ -25,8 +25,7 @@ const isAuthenticated = async (ctx: CustomExtendableContext, next: Next) => {
         if (err.name === 'TokenExpiredError' && refreshToken) {
           const tokenInfo = await getRefreshTokenInfo(refreshToken);
           const authTokens = createAuthToken(tokenInfo.userId, tokenInfo.authType);
-          ctx.cookies.set(ACCESS_TOKEN_NAME, authTokens.accessToken);
-          ctx.cookies.set(REFRESH_TOKEN_NAME, authTokens.refreshToken);
+          setAuthCookie(ctx, authTokens.accessToken, authTokens.refreshToken);
           ctx.userId = tokenInfo.userId;
           ctx.authType = tokenInfo.authType;
 

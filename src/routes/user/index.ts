@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { SocialLoginReq } from '../../models/routes/SocialLoginReq';
 import { getSocialUser, getUserById, getUserWithToken, saveSocialUser } from '../../service/userService';
-import { resError, resOK } from '../../utils/common';
+import { resError, resOK, setAuthCookie } from '../../utils/common';
 import config from '../../../config';
 import { getShareCodeInfoByShareCode } from '../../service/authService';
 import CommonError from '../../error/CommonError';
@@ -39,8 +39,7 @@ router.post('/login/social', async (ctx) => {
   // 가입된 유저는 로그인 정보 반환
   if (userInfo) {
     const userRes = getUserWithToken(userInfo);
-    ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken, {sameSite: 'none', secure: true});
-    ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken,{sameSite: 'none', secure: true});
+    setAuthCookie(ctx, userRes.accessToken, userRes.refreshToken);
     return resOK(ctx, userRes);
   }
 
@@ -52,14 +51,14 @@ router.post('/login/social', async (ctx) => {
   }
 
   const userRes = getUserWithToken(savedUser);
-  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken,{sameSite: 'none', secure: true});
-  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken, {sameSite: 'none', secure: true});
+  setAuthCookie(ctx, userRes.accessToken, userRes.refreshToken);
+
   return resOK(ctx, userRes);
 });
 
 router.post('/logout', async (ctx) => {
-  ctx.cookies.set(ACCESS_TOKEN_NAME, '', {sameSite: 'none', secure: true});
-  ctx.cookies.set(REFRESH_TOKEN_NAME, '', {sameSite: 'none', secure: true});
+  setAuthCookie(ctx, '','');
+
   return resOK(ctx, '');
 });
 
@@ -80,8 +79,7 @@ router.post('/share-code-login',  async (ctx) => {
   }
 
   const userRes = getUserWithToken(userInfo, 'share');
-  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken, {sameSite: 'none', secure: true});
-  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken,{sameSite: 'none', secure: true});
+  setAuthCookie(ctx, userRes.accessToken, userRes.refreshToken);
 
   return resOK(ctx, userRes);
 });
