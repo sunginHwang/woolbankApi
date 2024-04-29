@@ -39,8 +39,8 @@ router.post('/login/social', async (ctx) => {
   // 가입된 유저는 로그인 정보 반환
   if (userInfo) {
     const userRes = getUserWithToken(userInfo);
-    ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken);
-    ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken);
+    ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken, {sameSite: 'none'});
+    ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken, {sameSite: 'none'});
     return resOK(ctx, userRes);
   }
 
@@ -52,15 +52,14 @@ router.post('/login/social', async (ctx) => {
   }
 
   const userRes = getUserWithToken(savedUser);
-  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken);
-  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken);
-
+  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken, {sameSite: 'none'});
+  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken, {sameSite: 'none'});
   return resOK(ctx, userRes);
 });
 
 router.post('/logout', async (ctx) => {
-  ctx.cookies.set(ACCESS_TOKEN_NAME, '');
-  ctx.cookies.set(REFRESH_TOKEN_NAME, '');
+  ctx.cookies.set(ACCESS_TOKEN_NAME, '', {sameSite: 'none'});
+  ctx.cookies.set(REFRESH_TOKEN_NAME, '', {sameSite: 'none'});
   return resOK(ctx, '');
 });
 
@@ -68,26 +67,24 @@ router.post('/share-code-login',  async (ctx) => {
 
   const { shareCode }: {shareCode: string} = ctx.request.body as {shareCode: string};
 
-
   const userShareCode = await getShareCodeInfoByShareCode(shareCode);
 
   if (userShareCode === undefined) {
-    new CommonError(`share-code: ${shareCode} is not exist share-code`, 401);
-    return;
+    throw new CommonError(`share-code: ${shareCode} is not exist share-code`, 401);
   }
 
   const userInfo = await getUserById(userShareCode.userId);
 
   if (userInfo === undefined) {
-    new CommonError(`share-code: ${shareCode} is not exist share-code user-info`, 401);
-    return;
+    throw new CommonError(`share-code: ${shareCode} is not exist share-code user-info`, 401);
   }
 
   const userRes = getUserWithToken(userInfo, 'share');
-  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken);
-  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken);
+  ctx.cookies.set(ACCESS_TOKEN_NAME, userRes.accessToken, {sameSite: 'none'});
+  ctx.cookies.set(REFRESH_TOKEN_NAME, userRes.refreshToken, {sameSite: 'none'});
 
   return resOK(ctx, userRes);
 });
 
 export default router;
+
