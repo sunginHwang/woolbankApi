@@ -24,6 +24,10 @@ createConnection().then(async () => {
         origin: 'https://bank.woolta.com', // Next.js 애플리케이션의 주소
         credentials: true, // 쿠키 공유를 위해 필요
       }));
+    app.use((ctx, next) => {
+        ctx.cookies.secure = true;
+        return next();
+    });
       //app.use(cors());
      app.use(cookie());  
     app.use(bodyParser());
