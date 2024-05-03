@@ -1,5 +1,8 @@
 import {ExtendableContext} from "koa";
 import {IRes} from "../models/IRes";
+import config from '../../config';
+
+const {  ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } = config.authToken;
 
 export const resOK = <T>(ctx: ExtendableContext, res: T) => {
     const okRes: IRes<T> = {
@@ -25,6 +28,6 @@ export const resError = ({ctx, errorCode, message}: {ctx: ExtendableContext, err
 
 
 export const setAuthCookie = (ctx: ExtendableContext, accessToken: string, refreshToken: string) => {
-    ctx.cookies.set('accessToken', accessToken,  {httpOnly: true, secure: true, sameSite: 'none'});
-    ctx.cookies.set('refreshToken', refreshToken,  {httpOnly: true, secure: true, sameSite: 'none'});
+    ctx.cookies.set(ACCESS_TOKEN_NAME, accessToken,  {httpOnly: true, secure: true, sameSite: 'none'});
+    ctx.cookies.set(REFRESH_TOKEN_NAME, refreshToken,  {httpOnly: true, secure: true, sameSite: 'none'});
 }
