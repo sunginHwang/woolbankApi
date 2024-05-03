@@ -63,7 +63,8 @@ router.post('/logout', async (ctx) => {
 });
 
 router.post('/share-code-login',  async (ctx) => {
-
+  console.log('--헤엥?');
+  console.log(ctx.cookies.get('w.access'));
   const { shareCode }: {shareCode: string} = ctx.request.body as {shareCode: string};
 
   const userShareCode = await getShareCodeInfoByShareCode(shareCode);
