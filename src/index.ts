@@ -21,7 +21,7 @@ createConnection().then(async () => {
     const app = new Koa();
 
     app.use(cors({
-        origin:'https://bank-woolta.com',
+        origin: 'https://bank.woolta.com',
         credentials: true, // 쿠키 공유를 위해 필요
       }));
 
