@@ -20,10 +20,20 @@ cron.schedule('0 0 0 * * *', async function () {
 createConnection().then(async () => {
     const app = new Koa();
 
-    app.use(cors({
-        origin: 'https://bank.woolta.com', // Next.js 애플리케이션의 주소
-        credentials: true, // 쿠키 공유를 위해 필요
-      }));
+    app.use(async (ctx, next) => {
+        const allowedOrigins = ['https://bank.woolta.com', 'http://localhost:4200', 'http://localhost:4100'];
+        const origin = ctx.request.get('Origin');
+        console.log('origin', origin);
+        if (allowedOrigins.includes(origin)) {
+            ctx.set('Access-Control-Allow-Origin', origin);
+        }
+        ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        ctx.set('Access-Control-Allow-Headers', 'Content-Type');
+        ctx.set('Access-Control-Allow-Credentials', 'true');
+        await next();
+    });
+
+
     app.use((ctx, next) => {
         ctx.cookies.secure = true;
         return next();
