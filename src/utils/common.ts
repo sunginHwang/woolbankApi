@@ -28,6 +28,8 @@ export const resError = ({ctx, errorCode, message}: {ctx: ExtendableContext, err
 
 
 export const setAuthCookie = (ctx: ExtendableContext, accessToken: string, refreshToken: string) => {
-    ctx.cookies.set(ACCESS_TOKEN_NAME, accessToken,  {httpOnly: true, secure: true, sameSite: 'none'});
-    ctx.cookies.set(REFRESH_TOKEN_NAME, refreshToken,  {httpOnly: true, secure: true, sameSite: 'none'});
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1); // Set expires to 1 year later
+    ctx.cookies.set(ACCESS_TOKEN_NAME, accessToken,  {expires,httpOnly: true, secure: true, sameSite: 'none'});
+    ctx.cookies.set(REFRESH_TOKEN_NAME, refreshToken,  {expires,httpOnly: true, secure: true, sameSite: 'none'});
 }
