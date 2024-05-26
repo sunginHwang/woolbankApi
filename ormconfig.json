@@ -1,10 +1,10 @@
 {
    "type": "mysql",
-   "host": "localhost",
+   "host": "woolta.com",
    "port": 3306,
    "username": "root",
-   "password": "1234",
-   "database": "test",
+   "password": "as455748",
+   "database": "woolBank",
    "synchronize": false,
    "logging": false,
    "entities": [

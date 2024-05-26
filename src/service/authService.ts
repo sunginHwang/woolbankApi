@@ -31,7 +31,7 @@ export const getRefreshTokenInfo = async (token: string) => {
   };
 
   //@ts-ignore
-  jwt.verify(token, SECRET_TOKEN_KEY, (err: VerifyErrors | null, decoded: object | undefined) => {
+  await jwt.verify(token, SECRET_TOKEN_KEY, (err: VerifyErrors | null, decoded: object | undefined) => {
     if (err) {
       throw Error(err.message);
     }
