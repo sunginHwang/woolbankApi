@@ -8,6 +8,7 @@ import cron from 'node-cron';
 import { createConnection } from 'typeorm';
 import errorHandler from './middleware/errorHandler';
 import routes from './routes';
+import config from './config/baseConfig';
 import { scheduleRegularExpenditure } from './service/regularExpenditureService';
 
 
@@ -21,7 +22,7 @@ createConnection().then(async () => {
     const app = new Koa();
 
     app.use(cors({
-        origin: 'https://bank.woolta.com',
+        origin: config.clientUrl,
         credentials: true, // 쿠키 공유를 위해 필요
       }));
 

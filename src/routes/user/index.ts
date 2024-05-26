@@ -2,12 +2,10 @@ import Router from '@koa/router';
 import { SocialLoginReq } from '../../models/routes/SocialLoginReq';
 import { getSocialUser, getUserById, getUserWithToken, saveSocialUser } from '../../service/userService';
 import { resError, resOK, setAuthCookie } from '../../utils/common';
-import config from '../../../config';
 import { getShareCodeInfoByShareCode } from '../../service/authService';
 import CommonError from '../../error/CommonError';
 import isAuthenticated from '../../middleware/isAuthenticated';
 import { CustomExtendableContext } from '../../models/CustomExtendableContext';
-const {  ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } = config.authToken;
 
 const  router = new Router();
 
@@ -34,7 +32,7 @@ router.get('/', isAuthenticated, async (ctx: CustomExtendableContext) => {
 
 router.post('/login/social', async (ctx) => {
   const loginReq: SocialLoginReq = ctx.request.body as SocialLoginReq;
-  const userInfo = await getSocialUser('113980341083226565334', 'google');
+  const userInfo = await getSocialUser(loginReq.socialId, loginReq.loginType);
 
   // 가입된 유저는 로그인 정보 반환
   if (userInfo) {
@@ -63,10 +61,7 @@ router.post('/logout', async (ctx) => {
 });
 
 router.post('/share-code-login',  async (ctx) => {
-  console.log('--헤엥?');
-  console.log(ctx.cookies);
-  console.log(ctx.cookies.get('w.access'));
-  const { shareCode }: {shareCode: string} = ctx.request.body as {shareCode: string};
+  const { shareCode } = ctx.request.body as {shareCode: string};
 
   const userShareCode = await getShareCodeInfoByShareCode(shareCode);
 

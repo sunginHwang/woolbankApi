@@ -6,7 +6,7 @@ import crypto  from 'crypto';
 
 const { SECRET_TOKEN_KEY, ACCESS_TOKEN_EXPIRE, ACCESS_REFRESH_EXPIRE } = config.authToken;
 
-export const tokenGenerator = ({tokenType, userId, loginType} : {tokenType: 'access' | 'refresh' | 'access'; userId: number; loginType: AuthType}) => {
+export const tokenGenerator = ({tokenType, userId, loginType} : {tokenType: 'access' | 'refresh'; userId: number; loginType: AuthType}) => {
   const expireTime = tokenType == 'refresh' ? ACCESS_REFRESH_EXPIRE : ACCESS_TOKEN_EXPIRE;
 
   return jwt.sign({ userId, loginType }, SECRET_TOKEN_KEY, {
@@ -31,7 +31,7 @@ export const getRefreshTokenInfo = async (token: string) => {
   };
 
   //@ts-ignore
-  await jwt.verify(token, SECRET_TOKEN_KEY, (err: VerifyErrors | null, decoded: object | undefined) => {
+  jwt.verify(token, SECRET_TOKEN_KEY, (err: VerifyErrors | null, decoded: object | undefined) => {
     if (err) {
       throw Error(err.message);
     }

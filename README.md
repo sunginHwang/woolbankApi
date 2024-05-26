@@ -2,19 +2,10 @@
 woolBank api server for koa
 
 
-## 개인서버 실행 프로세스
-forever로 구성되어있음
-
-### forever 실행 리스트 확인
- > forever list
-
-### 리스트에서 종료할 시퀀스 번호 확인
-
-### 해당 번호 stop 처리
-> forever stop {seqNumber}
+### 운영환경 가이드
+운영환경에서는 forever가 global 설치 되어야 함.
+> npm install -global forever
 
 ### 프로젝트 기동
-> npm run start:fovever &
-
-
-test commit
+> local 에서는 npm run dev
+> 운영환경 에서는 npm run start:fovever &
