@@ -19,7 +19,7 @@ cron.schedule('0 0 0 * * *', async function () {
 
 createConnection().then(async () => {
     const app = new Koa();
-
+    console.log(config.clientUrl);
     app.use(cors({
         origin: config.clientUrl,
         credentials: true, // 쿠키 공유를 위해 필요
@@ -35,6 +35,6 @@ createConnection().then(async () => {
     app.use(routes.routes()).use(routes.allowedMethods());
 
     app.listen(4000, () => {
-        console.log('Listening to port 4000');
+        console.log('Listening to port 4000 and cors domain is ' + config.clientUrl);
     });
 });
