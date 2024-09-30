@@ -11,7 +11,7 @@ const { SECRET_TOKEN_KEY, ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } = config.authT
 const isAuthenticated = async (ctx: CustomExtendableContext, next: Next) => {
   const accessToken = ctx.cookies.get(ACCESS_TOKEN_NAME);
   const refreshToken = ctx.cookies.get(REFRESH_TOKEN_NAME);
-
+  
   if (!accessToken) {
     return resError({ ctx, errorCode: 401, message: '인증 토큰 정보가 존재하지 않습니다.' });
   }
