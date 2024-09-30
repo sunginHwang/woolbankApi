@@ -19,7 +19,7 @@ const isAuthenticated = async (ctx: CustomExtendableContext, next: Next) => {
   try {
     let verifyErrorMsg = '인증정보가 다릅니다.';
     //@ts-ignore
-    jwt.verify(accessToken as any, SECRET_TOKEN_KEY, async (err: VerifyErrors | null, decoded: object | undefined) => {
+    await jwt.verify(accessToken as any, SECRET_TOKEN_KEY, async (err: VerifyErrors | null, decoded: object | undefined) => {
 
       if (err) {
         if (err.name === 'TokenExpiredError' && refreshToken) {

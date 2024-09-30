@@ -11,7 +11,6 @@ import routes from './routes';
 import config from './config/baseConfig';
 import { scheduleRegularExpenditure } from './service/regularExpenditureService';
 
-
 // 매일 자정 정기 예금 실행
 cron.schedule('0 0 0 * * *', async function () {
     await scheduleRegularExpenditure();
@@ -25,14 +24,11 @@ createConnection().then(async () => {
         origin: config.clientUrl,
         credentials: true, // 쿠키 공유를 위해 필요
       }));
-
     app.use((ctx, next) => {
         ctx.cookies.secure = true;
         return next();
     });
-      //app.use(cors());
-     app.use(cookie());
-
+    app.use(cookie());
     app.use(bodyParser());
     app.use(errorHandler);
     app.use(serve('./src'));
