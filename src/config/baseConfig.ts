@@ -14,7 +14,7 @@ type envType = {
 const configList: envType = {
     development: {
         uploadUrl: 'https://banketlist-api.woolta.com',
-        clientUrl: 'https://bank-local.woolta.com'
+        clientUrl: 'https://bank-local.woolta.com:433'
     },
     production: {
         uploadUrl: 'https://banketlist-api.woolta.com',
