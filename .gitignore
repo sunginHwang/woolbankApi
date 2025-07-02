@@ -103,5 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-# ormCinfig
+# ormConfig
 ormconfig.json
+# 환경별 TypeORM 설정 파일들은 버전 관리에 포함
+# ormconfig.development.json
+# ormconfig.production.json
+# ormconfig.js

@@ -10,6 +10,7 @@ import errorHandler from './middleware/errorHandler';
 import routes from './routes';
 import config from './config/baseConfig';
 import { scheduleRegularExpenditure } from './service/regularExpenditureService';
+import ormConfig from '../ormconfig';
 
 // 매일 자정 정기 예금 실행
 cron.schedule('0 0 0 * * *', async function () {
@@ -17,7 +18,7 @@ cron.schedule('0 0 0 * * *', async function () {
 });
 
 
-createConnection().then(async () => {
+createConnection(ormConfig).then(async () => {
     const app = new Koa();
     console.log(config.clientUrl);
     app.use(cors({

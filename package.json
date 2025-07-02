@@ -7,7 +7,11 @@
     "production": "NODE_ENV=production ts-node src/index.ts",
     "start:forever": "NODE_ENV=production forever start -v -c ts-node ./src/index.ts",
     "build": "tsc",
-    "start:prod": "NODE_ENV=production pm2 start ecosystem.config.js --env production"
+    "start:prod": "NODE_ENV=production pm2 start ecosystem.config.js --env production",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm migration:generate -- -d ormconfig.js",
+    "migration:run": "npm run typeorm migration:run -- -d ormconfig.js",
+    "migration:revert": "npm run typeorm migration:revert -- -d ormconfig.js"
   },
   "eslintConfig": {
     "extends": [

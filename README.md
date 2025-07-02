@@ -35,4 +35,28 @@
 
 
 ### production 
-> 운영환경 에서는 npm run start:fovever &
+> 운영환경 에서는 npm run start:forever &
+
+## TypeORM 설정
+
+프로젝트는 환경별로 다른 TypeORM 설정을 사용합니다:
+
+- **개발 환경**: `ormconfig.development.json` - TypeScript 파일 참조 (`src/entity/**/*.ts`)
+- **프로덕션 환경**: `ormconfig.production.json` - 컴파일된 JavaScript 파일 참조 (`dist/src/entity/**/*.js`)
+
+### 마이그레이션 명령어
+
+```bash
+# 마이그레이션 생성
+npm run migration:generate -- src/migration/MigrationName
+
+# 마이그레이션 실행
+npm run migration:run
+
+# 마이그레이션 되돌리기
+npm run migration:revert
+```
+
+환경은 `NODE_ENV` 환경변수에 따라 자동으로 설정됩니다:
+- `NODE_ENV=development`: 개발 환경 설정 사용
+- `NODE_ENV=production`: 프로덕션 환경 설정 사용
