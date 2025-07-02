@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
     "production": "NODE_ENV=production ts-node src/index.ts",
-    "start:forever": "NODE_ENV=production forever start -v -c ts-node ./src/index.ts"
+    "start:forever": "NODE_ENV=production forever start -v -c ts-node ./src/index.ts",
+    "build": "tsc",
+    "start:prod": "NODE_ENV=production pm2 start ecosystem.config.js --env production"
   },
   "eslintConfig": {
     "extends": [

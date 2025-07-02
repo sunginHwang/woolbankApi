@@ -7,22 +7,15 @@ module.exports = {
    * @see {@link http://pm2.keymetrics.io/docs/usage/application-declaration/}
    */
   apps: [
-    // front local server
     {
-      // application name
-      name: 'banketList-prod',
-      // script path
-      script: './node_modules/.bin/ts-node',
-      args: './src/index.ts',
+      name: "woolbankApiServer",
+      script: "./dist/src/index.js",
       // watch
       watch: false,
       env: {
         NODE_ENV: 'production',
         // port
         PORT: 4000,
-        // debug environment variables
-        DEBUG: 'test:banket-list:*',
-        DEBUG_COLORS: true
       },
       max_memory_restart: 50,
       node_args: [
