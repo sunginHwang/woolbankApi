@@ -34,34 +34,94 @@ export const scheduleRegularExpenditure = async () => {
   const isNot31 = nowDate !== 31;
   const findDays = isLastDayOfMonth(now) && isNot31 ? _.range(nowDate, 32) : [nowDate];
 
+  const connection = getConnection();
+  const queryRunner = connection.createQueryRunner();
+
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
   try {
     const regularExpenditureList = await getRegularExpenditureListByRegularDate(findDays);
 
     if (regularExpenditureList.length === 0) {
+      await queryRunner.commitTransaction();
       return;
     }
 
-    const insertValues = regularExpenditureList.map((regularExpenditure) => {
-      const { title, amount, userId, accountBookCategoryId, regularDate } = regularExpenditure;
+    const insertValues = [];
+    const regularExpendituresToUpdate = [];
+    const regularExpendituresToDelete = [];
+
+    for (const regularExpenditure of regularExpenditureList) {
+      const { title, amount, userId, accountBookCategoryId, regularDate, installmentMonths, paidInstallmentMonths } = regularExpenditure;
       const registerDateTime = setDate(now, regularDate);
-      return {
+      
+      insertValues.push({
         title,
         amount,
         memo: '',
-        type: 'expenditure',
+        type: 'expenditure' as const,
         isRegularExpenditure: true,
         createdAt: now,
         updatedAt: now,
         registerDateTime,
         userId,
         accountBookCategoryId
-      };
-    });
+      });
 
-    // @ts-ignore
-    await getConnection().createQueryBuilder().insert().into(AccountBook).values(insertValues).execute();
+      // installmentMonths가 존재하는 경우 처리
+      if (installmentMonths && installmentMonths > 0) {
+        const nextPaidInstallmentMonths = paidInstallmentMonths + 1;
+        
+        if (nextPaidInstallmentMonths >= installmentMonths) {
+          // 할부 개월 수에 도달했으면 삭제 대상에 추가
+          regularExpendituresToDelete.push(regularExpenditure.id);
+        } else {
+          // 아직 할부 개월 수에 도달하지 않았으면 업데이트 대상에 추가
+          regularExpendituresToUpdate.push({
+            id: regularExpenditure.id,
+            paidInstallmentMonths: nextPaidInstallmentMonths
+          });
+        }
+      }
+    }
+
+    // AccountBook 생성
+    if (insertValues.length > 0) {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(AccountBook)
+        .values(insertValues)
+        .execute();
+    }
+
+    // paidInstallmentMonths 벌크 업데이트
+    if (regularExpendituresToUpdate.length > 0) {
+      const updateIds = regularExpendituresToUpdate.map(item => item.id);
+      const updateValues = regularExpendituresToUpdate.map(item => item.paidInstallmentMonths);
+      
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(RegularExpenditure)
+        .set({
+          paidInstallmentMonths: () => `CASE id ${updateIds.map((id, index) => `WHEN ${id} THEN ${updateValues[index]}`).join(' ')} END`
+        })
+        .whereInIds(updateIds)
+        .execute();
+    }
+
+    // 할부 완료된 정기지출 삭제
+    if (regularExpendituresToDelete.length > 0) {
+      await queryRunner.manager.delete(RegularExpenditure, { id: In(regularExpendituresToDelete) });
+    }
+
+    await queryRunner.commitTransaction();
   } catch (e) {
+    await queryRunner.rollbackTransaction();
     console.log(e);
+  } finally {
+    await queryRunner.release();
   }
 };
 

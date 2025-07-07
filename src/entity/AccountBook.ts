@@ -32,6 +32,10 @@ export class AccountBook extends BaseEntity {
   @Column({ name: 'is_regular_expenditure' })
   isRegularExpenditure: boolean;
 
+  @Column({ name: 'is_disabled_budget' })
+  isDisabledBudget: boolean;
+
+
   @Column({ name: 'register_date_time' })
   registerDateTime: Date;
 
