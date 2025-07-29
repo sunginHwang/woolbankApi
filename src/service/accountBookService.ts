@@ -39,7 +39,7 @@ export const getAccountBook = async ({userId, id}: { userId: number; id: number 
 };
 
 export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: number) => {
-    const {categoryId, amount, registerDateTime, memo = '', title, type, isDisabledBudget = false, scheduledPaymentsType, scheduledPaymentsValue} = reqType;
+    const {categoryId, amount, registerDateTime, memo = '', title, type, isDisabledBudget = false, scheduledPaymentType, scheduledPaymentDay, installmentMonth} = reqType;
     const accountBookCategory = await getAccountBookCategoryByIdAndUserId(categoryId, userId);
 
     if (!accountBookCategory) {
@@ -53,27 +53,30 @@ export const saveAccountBook = async (reqType: SaveAccountBookReqType, userId: n
     await queryRunner.startTransaction();
     
    try {
-    if (!!scheduledPaymentsType && !!scheduledPaymentsValue) {
-        // 정기지출 일자는 할부인경우 작성일 시점, 반복인 경우 반복일자를 기준으로 합니다.
-        const regularDate = scheduledPaymentsType === 'repeat' ? scheduledPaymentsValue : getDate(new Date());
+    const accountBook = new AccountBook();
+    const isRegularExpenditure = !!scheduledPaymentType && !!scheduledPaymentDay
+    if (isRegularExpenditure) {
         const regularExpenditure = new RegularExpenditure();
         regularExpenditure.title = title;
         regularExpenditure.amount = amount;
-        regularExpenditure.regularDate = regularDate;
+        regularExpenditure.regularDate = scheduledPaymentDay;
         regularExpenditure.accountBookCategoryId = accountBookCategory.id;
         regularExpenditure.isAutoExpenditure = true;
         regularExpenditure.userId = userId;
+
+        accountBook.regularDate = scheduledPaymentDay;
         
-        // 할부인 경우 할부일 추가
-        if (scheduledPaymentsType === 'installment') {
-            regularExpenditure.installmentMonths = scheduledPaymentsValue;
-            regularExpenditure.paidInstallmentMonths = 1;
+        if (scheduledPaymentType === 'installment') {
+            const paidInstallmentMonth = 1;
+            regularExpenditure.installmentMonth = installmentMonth ?? paidInstallmentMonth;
+            regularExpenditure.paidInstallmentMonth = paidInstallmentMonth;
+            accountBook.installmentMonth = installmentMonth ?? paidInstallmentMonth;
+            accountBook.paidInstallmentMonth = paidInstallmentMonth;
         }
 
         await regularExpenditure.save();
     }
 
-    const accountBook = new AccountBook();
     accountBook.title = title;
     accountBook.amount = amount;
     accountBook.memo = memo;
@@ -125,7 +128,7 @@ export const removeAccountBook = async (id: number, userId: number) => {
 };
 
 export const convertClientAccountBook = (accountBook: AccountBook, useMemo?: boolean) => {
-    const {id, title, type, memo, isRegularExpenditure, amount, registerDateTime, accountBookCategory} = accountBook;
+    const {id, title, type, memo, isRegularExpenditure, amount, registerDateTime, accountBookCategory,isDisabledBudget } = accountBook;
     const commonResult = {
         id,
         title,
@@ -133,6 +136,7 @@ export const convertClientAccountBook = (accountBook: AccountBook, useMemo?: boo
         isRegularExpenditure,
         amount,
         registerDateTime,
+        isDisabledBudget,
         category: accountBookCategory
     };
 

@@ -9,6 +9,7 @@ import { getNowDate, getRemainDate } from '../utils/date';
 import { getAccountBookCategoryByIdAndUserId } from './accountBookCategoryService';
 import { AccountBookCategory } from '../entity/AccountBookCategory';
 import { AccountBook } from '../entity/AccountBook';
+import { AccountBookCategoryType } from '../models/AccountBookCategoryType';
 
 export const getRegularExpenditureListByUserId = async (userId: number, limit: number = 100) => {
   return await RegularExpenditure.find({
@@ -49,41 +50,62 @@ export const scheduleRegularExpenditure = async () => {
     }
 
     const insertValues = [];
-    const regularExpendituresToUpdate = [];
+    const regularExpendituresToUpdate: { id: number; nextPaidInstallmentMonth: number }[] = [];
     const regularExpendituresToDelete = [];
 
     for (const regularExpenditure of regularExpenditureList) {
-      const { title, amount, userId, accountBookCategoryId, regularDate, installmentMonths, paidInstallmentMonths } = regularExpenditure;
+      const { title, amount, userId, accountBookCategoryId, regularDate, installmentMonth, paidInstallmentMonth } = regularExpenditure;
       const registerDateTime = setDate(now, regularDate);
-      
-      insertValues.push({
+
+      const newAccountBook: {
+        title: string;
+        amount: number;
+        memo: string;
+        type: AccountBookCategoryType;
+        isRegularExpenditure: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        registerDateTime: Date;
+        userId: number;
+        regularDate: number;
+        accountBookCategoryId: number;
+        installmentMonth?: number;
+        paidInstallmentMonth?: number;
+      }= {
         title,
         amount,
         memo: '',
+        regularDate,
         type: 'expenditure' as const,
         isRegularExpenditure: true,
         createdAt: now,
         updatedAt: now,
         registerDateTime,
         userId,
-        accountBookCategoryId
-      });
-
+        accountBookCategoryId,
+      }
+    
       // installmentMonths가 존재하는 경우 처리
-      if (installmentMonths && installmentMonths > 0) {
-        const nextPaidInstallmentMonths = paidInstallmentMonths + 1;
+      if (installmentMonth && installmentMonth > 0) {
+        const nextPaidInstallmentMonth = paidInstallmentMonth + 1;
         
-        if (nextPaidInstallmentMonths >= installmentMonths) {
+        newAccountBook.installmentMonth = installmentMonth;
+        newAccountBook.paidInstallmentMonth= nextPaidInstallmentMonth;
+
+        if (nextPaidInstallmentMonth >= installmentMonth) {
           // 할부 개월 수에 도달했으면 삭제 대상에 추가
           regularExpendituresToDelete.push(regularExpenditure.id);
         } else {
           // 아직 할부 개월 수에 도달하지 않았으면 업데이트 대상에 추가
           regularExpendituresToUpdate.push({
             id: regularExpenditure.id,
-            paidInstallmentMonths: nextPaidInstallmentMonths
+            nextPaidInstallmentMonth: nextPaidInstallmentMonth
           });
         }
       }
+
+        
+      insertValues.push(newAccountBook);
     }
 
     // AccountBook 생성
@@ -96,18 +118,16 @@ export const scheduleRegularExpenditure = async () => {
         .execute();
     }
 
-    // paidInstallmentMonths 벌크 업데이트
+    // paidInstallmentMonth 벌크 업데이트
     if (regularExpendituresToUpdate.length > 0) {
-      const updateIds = regularExpendituresToUpdate.map(item => item.id);
-      const updateValues = regularExpendituresToUpdate.map(item => item.paidInstallmentMonths);
-      
+      // TypeORM의 벌크 업데이트 사용
       await queryRunner.manager
         .createQueryBuilder()
         .update(RegularExpenditure)
         .set({
-          paidInstallmentMonths: () => `CASE id ${updateIds.map((id, index) => `WHEN ${id} THEN ${updateValues[index]}`).join(' ')} END`
+          paidInstallmentMonth: () => `CASE id ${regularExpendituresToUpdate.map(item => `WHEN ${item.id} THEN ${item.nextPaidInstallmentMonth}`).join(' ')} ELSE paid_installment_month END`
         })
-        .whereInIds(updateIds)
+        .whereInIds(regularExpendituresToUpdate.map(item => item.id))
         .execute();
     }
 

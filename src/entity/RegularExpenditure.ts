@@ -26,14 +26,14 @@ export class RegularExpenditure extends BaseEntity {
     @Column({name: 'regular_date'})
     regularDate: number;
 
-    @Column({name: 'installment_months'})
-    installmentMonths: number;
-
     @Column({name: 'is_auto_expenditure'})
     isAutoExpenditure: boolean;
 
-    @Column({name: 'paid_installment_months'})
-    paidInstallmentMonths: number;
+    @Column({name: 'installment_month'})
+    installmentMonth: number;
+
+    @Column({name: 'paid_installment_month'})
+    paidInstallmentMonth: number;
 
     @Column({name: 'user_id'})
     userId: number;

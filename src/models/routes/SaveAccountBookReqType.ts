@@ -10,6 +10,7 @@ export interface SaveAccountBookReqType {
     type: AccountBookCategoryType;
     amount: number;
     isDisabledBudget?:boolean;
-    scheduledPaymentsType?: ScheduledPaymentType;
-    scheduledPaymentsValue?: number;
+    scheduledPaymentType?: ScheduledPaymentType;
+    scheduledPaymentDay?: number;
+    installmentMonth?: number;
 }
