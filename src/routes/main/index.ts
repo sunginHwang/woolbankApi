@@ -4,6 +4,7 @@ import {getNotExpirationAccounts, getSavedAmount} from "../../service/accountSer
 import {getBucketListByUserId} from "../../service/bucketListService";
 import {MainInfoResType} from "../../models/routes/MainInfoResType";
 import isAuthenticated from "../../middleware/isAuthenticated";
+import { scheduleRegularExpenditure } from '../../service/regularExpenditureService';
 
 const router = new Router();
 
@@ -20,5 +21,14 @@ router.get('/', isAuthenticated, async (ctx) => {
 
     return resOK(ctx, res);
 });
+
+router.get('/test',  async (ctx) => {
+    console.log('test');
+    scheduleRegularExpenditure();
+
+    return resOK(ctx, 'ok');
+});
+
+
 
 export default router;
